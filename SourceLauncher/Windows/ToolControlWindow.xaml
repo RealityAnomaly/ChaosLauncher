@@ -1,0 +1,79 @@
+﻿<Window x:Class="SourceLauncher.Windows.ToolControlWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:SourceLauncher.Windows"
+        xmlns:local1="clr-namespace:SourceLauncher"
+        mc:Ignorable="d"
+        x:Name="window"
+        Title="Tool Configuration" Height="450" Width="800" ResizeMode="NoResize">
+    <Window.Resources>
+        <ResourceDictionary>
+            <local1:NegateBooleanConverter x:Key="inverter" />
+        </ResourceDictionary>
+    </Window.Resources>
+    <Grid x:Name="mainGrid">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="40" />
+        </Grid.RowDefinitions>
+        <TabControl x:Name="tabControl" Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <TabItem Header="General">
+                <Grid>
+                    <Label Content="Block Nickname" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,10,0,0" />
+                    <TextBox HorizontalAlignment="Left" VerticalAlignment="Top" Margin="125,14,0,0" Width="216" Text="{Binding Nickname}" />
+
+                    <Label Content="Tool Reference" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,41,0,0" />
+                    <TextBox HorizontalAlignment="Left" VerticalAlignment="Top" Margin="125,45,0,0" Width="153" Text="{Binding Name, Mode=OneWay}" IsReadOnly="True" />
+                    <Button HorizontalAlignment="Left" VerticalAlignment="Top" Content="Set Ref" Margin="283,45,0,0" Width="58" Height="18" FontSize="10" Click="SetTool_Click" />
+
+                    <Label Content="Tool Type" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,72,0,0" />
+                    <RadioButton x:Name="cmdletBtn" Content="Cmdlet" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="125,78,0,0" GroupName="ToolType" IsEnabled="False" />
+                    <RadioButton x:Name="scriptBtn" Content="Script" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="187,78,0,0" GroupName="ToolType" IsEnabled="False" />
+                    <RadioButton x:Name="externalBtn" Content="External" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="241,78,0,0" GroupName="ToolType" IsEnabled="False" />
+                </Grid>
+            </TabItem>
+            <TabItem Header="Parameters">
+                <Grid>
+                    <ListBox x:Name="availableList" Margin="10,30,622,10" SelectionMode="Multiple" />
+                    <Label Content="Available Parameters" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,-1,0,0" Width="175"/>
+                    <ListBox x:Name="configuredList" Margin="286,30,347,10" SelectionMode="Multiple" />
+                    <Label Content="Configured Parameters" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="291,-1,0,0" Width="175"/>
+                    <GroupBox x:Name="paramGroup" Header="Parameter Source" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="450,25,0,0" Height="123" IsEnabled="False" Width="316">
+                        <Grid>
+                            <RadioButton Content="Static" HorizontalAlignment="Left" Margin="10,14,0,0" VerticalAlignment="Top" GroupName="ParameterSource" x:Name="staticButton" />
+                            <TextBox x:Name="staticTextBox" HorizontalAlignment="Left" Margin="107,14,0,0" VerticalAlignment="Top" Width="101" IsEnabled="{Binding IsChecked, ElementName=staticButton}" TextChanged="StaticTextBox_TextChanged" />
+                            <Button Content="Set Multiple" HorizontalAlignment="Left" Margin="211,14,0,0" VerticalAlignment="Top" Width="83" Height="18" FontSize="10" IsEnabled="{Binding IsChecked, ElementName=staticButton}"/>
+
+                            <RadioButton Content="Reference" HorizontalAlignment="Left" Margin="10,34,0,0" VerticalAlignment="Top" GroupName="ParameterSource" x:Name="connectionButton" />
+                            <TextBox x:Name="connectionTextBox" HorizontalAlignment="Left" Margin="107,34,0,0" VerticalAlignment="Top" Width="101" IsEnabled="{Binding IsChecked, ElementName=connectionButton}" IsReadOnly="True" />
+                            <Button Content="Set Entity" HorizontalAlignment="Left" Margin="211,34,0,0" VerticalAlignment="Top" Width="83" Height="18" FontSize="10" IsEnabled="{Binding IsChecked, ElementName=connectionButton}" Click="Connect_Click" />
+
+                            <RadioButton Content="Variable" HorizontalAlignment="Left" Margin="10,54,0,0" VerticalAlignment="Top" GroupName="ParameterSource" x:Name="variableButton" />
+                            <TextBox x:Name="variableTextBox" HorizontalAlignment="Left" Margin="107,54,0,0" VerticalAlignment="Top" Width="187" IsEnabled="{Binding IsChecked, ElementName=variableButton}" />
+
+                            <RadioButton Content="Switch" HorizontalAlignment="Left" Margin="10,74,0,0" VerticalAlignment="Top" GroupName="ParameterSource" x:Name="switchButton" />
+                        </Grid>
+                    </GroupBox>
+                    <GroupBox x:Name="shellGroup" Header="Parameter Help" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="450,153,0,0" Height="188" Width="316" IsEnabled="False">
+                        <TextBlock x:Name="helpBlock" Margin="10,10,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="145" HorizontalAlignment="Left" Width="283"/>
+
+                    </GroupBox>
+                    <Button x:Name="addBtn" Content="Add &gt;" Margin="169,145,0,0" Height="20" HorizontalAlignment="Left" VerticalAlignment="Top" Width="112" IsEnabled="False" Click="AddBtn_Click" />
+                    <Button x:Name="removeBtn" Content="&lt; Remove" Margin="169,170,0,0" Height="20" HorizontalAlignment="Left" VerticalAlignment="Top" Width="112" IsEnabled="False" Click="RemoveBtn_Click" />
+                    <Button x:Name="addCustomBtn" Content="Add Custom" Margin="169,195,0,0" Height="20" HorizontalAlignment="Left" VerticalAlignment="Top" Width="112" />
+                </Grid>
+            </TabItem>
+        </TabControl>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="75" />
+                <ColumnDefinition Width="75" />
+            </Grid.ColumnDefinitions>
+            <Button x:Name="saveBtn" Grid.Column="1" Content="Save" HorizontalAlignment="Left" Margin="-20,10,0,0" VerticalAlignment="Top" Width="75" Click="SaveBtn_Click" />
+            <Button x:Name="cancelBtn" Grid.Column="2" Content="Cancel" HorizontalAlignment="Left" Margin="-10,10,0,0" VerticalAlignment="Top" Width="75" Click="CancelBtn_Click" />
+        </Grid>
+    </Grid>
+</Window>

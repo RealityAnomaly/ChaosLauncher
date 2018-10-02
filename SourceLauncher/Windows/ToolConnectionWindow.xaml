@@ -1,0 +1,15 @@
+﻿<Window x:Class="SourceLauncher.Windows.ToolConnectionWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:SourceLauncher.Windows"
+        mc:Ignorable="d"
+        Title="Entity Connection" Height="350" Width="200" ResizeMode="NoResize">
+    <Grid>
+        <ListBox x:Name="entityList" HorizontalAlignment="Stretch" Height="249" VerticalAlignment="Top" SelectionMode="Single" SelectionChanged="EntityList_SelectionChanged" />
+        <Button x:Name="linkButton" Content="Link Entity" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" IsEnabled="False" Click="LinkButton_Click" Height="48" />
+        <ComboBox x:Name="entityOutputs" HorizontalAlignment="Stretch" Margin="0,249,0,0" VerticalAlignment="Top" IsEnabled="False" IsEditable="False" />
+
+    </Grid>
+</Window>

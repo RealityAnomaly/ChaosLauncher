@@ -1,0 +1,86 @@
+﻿<RibbonWindow x:Class="SourceLauncher.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:SourceLauncher"
+        xmlns:controls="clr-namespace:SourceLauncher.Controls"
+        xmlns:ribbon="clr-namespace:System.Windows.Controls.Ribbon;assembly=System.Windows.Controls.Ribbon"
+        mc:Ignorable="d"
+        Title="Chaos Launcher" Height="702" Width="1204"
+        Closing="Window_Closing" Icon="/Images/cs_logo.png" KeyDown="RibbonWindow_KeyDown">
+    <RibbonWindow.Resources>
+    </RibbonWindow.Resources>
+    <Grid>
+        <DockPanel>
+            <Ribbon DockPanel.Dock="Top" HorizontalAlignment="Stretch">
+                <Ribbon.ApplicationMenu>
+                    <RibbonApplicationMenu>
+                        <RibbonApplicationMenu.AuxiliaryPaneContent>
+                            <RibbonGallery ScrollViewer.VerticalScrollBarVisibility="Auto">
+                                <RibbonGalleryCategory MaxColumnCount="1" Header="Recent workspaces">
+                                    <RibbonGalleryItem Content="No recent workspaces" />
+                                </RibbonGalleryCategory>
+                            </RibbonGallery>
+                        </RibbonApplicationMenu.AuxiliaryPaneContent>
+                        <RibbonApplicationMenuItem x:Name="newWorkspaceBtn" Header="New Workspace" Click="NewWorkspace_Click" />
+                        <RibbonApplicationMenuItem x:Name="loadWorkspaceBtn" Header="Load Workspace" Click="LoadWorkspace_Click"/>
+                        <RibbonApplicationMenuItem x:Name="saveWorkspaceBtn" Header="Save Workspace" Click="SaveWorkspaceBtn_Click" IsEnabled="False" />
+                        <RibbonApplicationMenuItem x:Name="closeWorkspaceBtn" Header="Close Workspace" Click="CloseWorkspaceBtn_Click" IsEnabled="False" />
+                        <RibbonSeparator />
+                        <RibbonApplicationMenuItem Header="Preferences" />
+                        <RibbonApplicationMenuItem Header="Close" />
+                    </RibbonApplicationMenu>
+                </Ribbon.ApplicationMenu>
+                <RibbonTab x:Name="generalTab" Header="General">
+                    <RibbonGroup Header="ChaosShell">
+                        <RibbonButton Label="New Window" LargeImageSource="/Images/cs_icon.png" Click="NewChaosShell_Click" />
+                        <RibbonButton Label="Show ChaosShell" />
+                        <RibbonButton Label="Hide ChaosShell" />
+                        
+                    </RibbonGroup>
+                </RibbonTab>
+                <RibbonTab x:Name="workspaceTab" Header="Workspace" Visibility="Hidden">
+                    <RibbonGroup Header="Path Configuration">
+                        <RibbonButton x:Name="configureWorkspaceBtn" Label="Configure Workspace" Click="ConfigureWorkspaceBtn_Click" />
+                        <RibbonButton Label="Set VProject" />
+                        <RibbonButton Label="Open Working Dir" />
+                    </RibbonGroup>
+                    <RibbonGroup Header="Engine Branch">
+                        <RibbonButton Label="Launch Source" LargeImageSource="/Images/source/hl2.ico" />
+                        <RibbonButton Label="Set Launch Parameters" />
+                        <RibbonButton Label="Set Game Directory" />
+                    </RibbonGroup>
+                    
+                    <RibbonGroup x:Name="p4group" Header="Perforce" Visibility="Hidden">
+                        <RibbonButton x:Name="p4v" Label="Open P4V" LargeImageSource="/Images/perforce/p4v.png" Click="P4open_Click" IsEnabled="False" />
+                        <RibbonButton x:Name="p4submit" Label="Submit" SmallImageSource="/Images/perforce/submit.png" IsEnabled="False" />
+                        <RibbonButton x:Name="p4diff" Label="Diff" SmallImageSource="/Images/perforce/diff.png" IsEnabled="False" />
+                        <RibbonButton x:Name="p4revert" Label="Revert" SmallImageSource="/Images/perforce/revert.png" IsEnabled="False" />
+                        <RibbonButton x:Name="p4checkout" Label="Check Out" SmallImageSource="/Images/perforce/checkout.png" IsEnabled="False" />
+                        <RibbonButton x:Name="p4merge" Label="Open P4Merge" SmallImageSource="/Images/perforce/p4m.png" Click="P4merge_Click" IsEnabled="False" />
+                        <RibbonButton x:Name="p4admin" Label="Open P4Admin" SmallImageSource="/Images/perforce/p4a.png" Click="P4admin_Click" IsEnabled="False" />
+                    </RibbonGroup>
+                </RibbonTab>
+                <RibbonTab x:Name="developerTab" Header="Developer">
+                    <RibbonButton Label="Set workspace dirty" Click="RibbonButton_Click" />
+                    <RibbonButton Label="Add cmdlet block" Click="AddCmdletWidget_Click" />
+                    <RibbonButton Label="Add script block" Click="AddScriptWidget_Click" />
+                    <RibbonButton Label="Add external block" Click="AddExternalWidget_Click" />
+                </RibbonTab>
+            </Ribbon>
+        </DockPanel>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="140" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="5" />
+                <RowDefinition Height="150" />
+            </Grid.RowDefinitions>
+            <Canvas x:Name="canvas" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" >
+            </Canvas>
+            <GridSplitter Grid.Row="2" HorizontalAlignment="Stretch" VerticalAlignment="Center" Height="5" />
+            <controls:ChaosShell x:Name="chaosShell" HorizontalAlignment="Stretch" Grid.Row="3" VerticalAlignment="Stretch"  />
+        </Grid>
+    </Grid>
+</RibbonWindow>
