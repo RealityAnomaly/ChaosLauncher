@@ -3,58 +3,46 @@ using SourceLauncher.Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Management.Automation;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using static SourceLauncher.Models.Parameter;
 
 namespace SourceLauncher.Windows
 {
+    /// <inheritdoc cref="Window" />
     /// <summary>
     /// Interaction logic for ToolControlWindow.xaml
     /// </summary>
-    public partial class ToolControlWindow : Window
+    public partial class ToolControlWindow
     {
+        private readonly ChaosShell _shell;
+        private readonly Canvas _canvas;
+        private readonly ObservableCollection<Parameter> _availableParameters = new ObservableCollection<Parameter>();
+        private Parameter _selectedParam;
         public Tool Tool { get; private set; }
-        private ChaosShell shell;
-        private Canvas canvas;
-        private Parameter selectedParam;
-        private ObservableCollection<Parameter> availableParameters = new ObservableCollection<Parameter>();
         public ToolControlWindow(ChaosShell shell, Canvas canvas, Tool tool, int tabIndex = 0)
         {
-            this.shell = shell;
-            this.canvas = canvas;
-            this.Tool = tool;
+            _shell = shell;
+            _canvas = canvas;
+            Tool = tool;
             InitializeComponent();
 
             tabControl.TabIndex = tabIndex;
-            availableList.ItemsSource = availableParameters;
+            availableList.ItemsSource = _availableParameters;
 
-            staticButton.Click += delegate { selectedParam.ParamMode = ParameterMode.Content; };
-            connectionButton.Click += delegate { selectedParam.ParamMode = ParameterMode.Reference; };
-            variableButton.Click += delegate { selectedParam.ParamMode = ParameterMode.Variable; };
-            switchButton.Click += delegate { selectedParam.ParamMode = ParameterMode.Switch; };
+            staticButton.Click += delegate { _selectedParam.ParamMode = ParameterMode.Content; };
+            connectionButton.Click += delegate { _selectedParam.ParamMode = ParameterMode.Reference; };
+            variableButton.Click += delegate { _selectedParam.ParamMode = ParameterMode.Variable; };
+            switchButton.Click += delegate { _selectedParam.ParamMode = ParameterMode.Switch; };
 
             RefreshTool();
         }
 
-        private void SetLinkDestination(Guid guid)
-        {
-
-        }
-
         private void RefreshTool()
         {
-            Title = String.Format("Tool Properties - {0}", Tool.ToString());
+            Title = $"Tool Properties - {Tool}";
             mainGrid.DataContext = Tool;
 
             configuredList.SelectedItems.Clear();
@@ -66,18 +54,27 @@ namespace SourceLauncher.Windows
             if (Tool.GetType() == typeof(CmdletTool))
             {
                 cmdletBtn.IsChecked = true;
-                CmdletTool ctool = Tool as CmdletTool;
+                if (!(Tool is CmdletTool ctool))
+                    throw new Exception("Could not cast Tool to CmdletTool.");
+
+                if (ctool.ReadOnly)
+                {
+                    SetTool.IsEnabled = false;
+                    Nickname.IsEnabled = false;
+                }
+
 
                 if (ctool.Metadata != null)
                 {
                     UpdateAvailable(ctool.Metadata.Parameters);
-                } else
+                }
+                else
                 {
                     Task.Run(() =>
                     {
-                        IDictionary<string, ParameterMetadata> info = shell.GetParameters(ctool.Name);
                         Dispatcher.BeginInvoke(new Action(() =>
                         {
+                            var info = _shell.GetParameters(ctool.Name);
                             UpdateAvailable(info);
                         }));
                     });
@@ -87,7 +84,7 @@ namespace SourceLauncher.Windows
             {
                 scriptBtn.IsChecked = true;
             }
-            else if (Tool.GetType() == typeof(ExternalTool))
+            else if (Tool is ExternalTool)
             {
                 externalBtn.IsChecked = true;
             }
@@ -95,17 +92,17 @@ namespace SourceLauncher.Windows
 
         private void UpdateAvailable(IDictionary<string, ParameterMetadata> info)
         {
-            availableParameters.Clear();
+            _availableParameters.Clear();
 
             foreach (KeyValuePair<string, ParameterMetadata> m in info)
             {
                 if (m.Key != null)
-                    availableParameters.Add(new Parameter(m.Value));
+                    _availableParameters.Add(new Parameter(m.Value));
             }
 
             foreach (Parameter par in Tool.Parameters)
             {
-                availableParameters.Remove(par);
+                _availableParameters.Remove(par);
             }
 
             configuredList.ItemsSource = Tool.Parameters;
@@ -132,14 +129,7 @@ namespace SourceLauncher.Windows
 
         private void AvailableList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (availableList.SelectedItems.Count > 0)
-            {
-                addBtn.IsEnabled = true;
-            }
-            else
-            {
-                addBtn.IsEnabled = false;
-            }
+            addBtn.IsEnabled = availableList.SelectedItems.Count > 0;
         }
 
         private void SelectRadioButton(RadioButton btn)
@@ -152,22 +142,15 @@ namespace SourceLauncher.Windows
                 switchButton,
             };
 
-            foreach (RadioButton btn2 in buttons)
+            foreach (var btn2 in buttons)
             {
-                if (btn == btn2)
-                {
-                    btn2.IsChecked = true;
-                }
-                else
-                {
-                    btn2.IsChecked = false;
-                }
+                btn2.IsChecked = btn == btn2;
             }
         }
 
         private void SetButtonMode(ParameterMode mode)
         {
-            if (!(mode == ParameterMode.Switch))
+            if (mode != ParameterMode.Switch)
             {
                 // If not a switch, force the switch button to be disabled, and make sure others are enabled
                 staticButton.IsEnabled = true;
@@ -201,18 +184,18 @@ namespace SourceLauncher.Windows
 
         private void SelectParam(Parameter param)
         {
-            selectedParam = param;
+            _selectedParam = param;
 
             paramGroup.IsEnabled = true;
             shellGroup.IsEnabled = true;
 
             SetButtonMode(param.ParamMode);
 
-            if (selectedParam.Content.Count > 0)
-                staticTextBox.Text = selectedParam.ContentToString();
+            if (_selectedParam.Content.Count > 0)
+                staticTextBox.Text = _selectedParam.ContentToString();
 
-            if (selectedParam.Reference != null)
-                connectionTextBox.Text = selectedParam.ReferenceToString();
+            if (_selectedParam.Reference != null)
+                connectionTextBox.Text = _selectedParam.ReferenceToString();
 
             if (param.Help != null)
             {
@@ -226,7 +209,7 @@ namespace SourceLauncher.Windows
                     {
                         lock (Tool)
                         {
-                            param.Help = shell.GetParameterHelp(Tool.Name, param.ToString());
+                            param.Help = _shell.GetParameterHelp(Tool.Name, param.ToString());
 
                             Dispatcher.BeginInvoke(new Action(() =>
                             {
@@ -242,7 +225,7 @@ namespace SourceLauncher.Windows
         }
         private void DeselectParam()
         {
-            selectedParam = null;
+            _selectedParam = null;
 
             // Clear all buttons and fields, and lock groups
             SelectRadioButton(null);
@@ -269,7 +252,7 @@ namespace SourceLauncher.Windows
 
             foreach (Parameter itm in toBeRemoved)
             {
-                availableParameters.Remove(itm);
+                _availableParameters.Remove(itm);
             }
 
             availableList.SelectedItems.Clear();
@@ -284,7 +267,7 @@ namespace SourceLauncher.Windows
             foreach (Parameter itm in configuredList.SelectedItems)
             {
                 toBeRemoved.Add(itm);
-                availableParameters.Add(itm);
+                _availableParameters.Add(itm);
             }
 
             foreach (Parameter itm in toBeRemoved)
@@ -308,7 +291,7 @@ namespace SourceLauncher.Windows
         private void Connect_Click(object sender, RoutedEventArgs e)
         {
             IList<Tool> tools = new List<Tool>();
-            foreach (UIElement element in canvas.Children)
+            foreach (UIElement element in _canvas.Children)
             {
                 if (!(element is ToolControl toolControl) || toolControl.Tool.Identifier == Tool.Identifier)
                     continue;
@@ -316,26 +299,32 @@ namespace SourceLauncher.Windows
                 tools.Add(toolControl.Tool);
             }
 
-            ToolConnectionWindow connectionWindow = new ToolConnectionWindow(tools, Tool);
+            var connectionWindow = new ToolConnectionWindow(tools, Tool);
             connectionWindow.ShowDialog();
 
-            selectedParam.Reference = connectionWindow.Reference;
-            connectionTextBox.Text = selectedParam.ReferenceToString();
+            _selectedParam.Reference = connectionWindow.Reference;
+            connectionTextBox.Text = _selectedParam.ReferenceToString();
         }
 
         private void StaticTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            selectedParam?.SetContent(staticTextBox.Text);
+            _selectedParam?.SetContent(staticTextBox.Text);
         }
 
         private void SetTool_Click(object sender, RoutedEventArgs e)
         {
-            if (Tool.GetType() == typeof(CmdletTool))
-                SetToolCmdlet();
-            else if (Tool.GetType() == typeof(ScriptTool))
-                SetToolScript();
-            else if (Tool.GetType() == typeof(ExternalTool))
-                SetToolExternal();
+            switch (Tool)
+            {
+                case CmdletTool _:
+                    SetToolCmdlet();
+                    break;
+                case ScriptTool _:
+                    SetToolScript();
+                    break;
+                case ExternalTool _:
+                    SetToolExternal();
+                    break;
+            }
         }
 
         private void SetToolCmdlet()
@@ -345,7 +334,7 @@ namespace SourceLauncher.Windows
             if (result != MessageBoxResult.Yes)
                 return;
 
-            CmdletTool newTool = CmdletTool.PickTool(shell);
+            CmdletTool newTool = CmdletTool.PickTool(_shell);
             if (newTool == null)
                 return;
 

@@ -1,25 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SourceLauncher.Models
 {
     public class Output
     {
-        private readonly Type type;
+        private readonly Type _type;
         public Output(Type type = null)
         {
-            this.type = type;
+            _type = type;
         }
 
         public override string ToString()
         {
-            if (type == null)
-                return "(Default Output)";
-
-            return type.ToString();
+            return _type == null ? "(Default Output)" : _type.ToString();
         }
     }
 }

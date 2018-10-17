@@ -1,10 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Management.Automation;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SourceLauncher.Models
 {
@@ -24,26 +21,27 @@ namespace SourceLauncher.Models
         /// </summary>
         public IList<string> Content { get; private set; } = new List<string>();
 
-        private readonly string Name;
-        [JsonIgnore]
-        public string Help;
-        public readonly Type ParamType;
+        private readonly string _name;
+        private readonly Type _paramType;
         public ParameterMode ParamMode = ParameterMode.Content;
         public OutputReference Reference;
 
+        [JsonIgnore]
+        public string Help;
+
         public Parameter(string name)
         {
-            Name = name;
+            _name = name;
         }
 
         public Parameter(ParameterMetadata meta)
         {
-            Name = meta.Name;
+            _name = meta.Name;
 
             if (meta.SwitchParameter)
                 ParamMode = ParameterMode.Switch;
 
-            ParamType = meta.ParameterType;
+            _paramType = meta.ParameterType;
         }
 
         public void SetContent(string content)
@@ -51,7 +49,7 @@ namespace SourceLauncher.Models
             SetContent(content.Split(';'));
         }
 
-        public void SetContent(IList<string> content)
+        private void SetContent(IList<string> content)
         {
             Content = content;
         }
@@ -63,17 +61,17 @@ namespace SourceLauncher.Models
 
         public override string ToString()
         {
-            return Name;
+            return _name;
         }
 
         public string ContentToString()
         {
-            return String.Join(";", Content);
+            return string.Join(";", Content);
         }
 
         public string ReferenceToString()
         {
-            return String.Format("ref:{0}:{1}", Reference.SourceToolId, Reference.SourceOutput.ToString());
+            return $"ref:{Reference.SourceToolId}:{Reference.SourceOutput}";
         }
     }
 }

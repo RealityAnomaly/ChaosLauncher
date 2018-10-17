@@ -23,16 +23,16 @@
                                 </RibbonGalleryCategory>
                             </RibbonGallery>
                         </RibbonApplicationMenu.AuxiliaryPaneContent>
-                        <RibbonApplicationMenuItem x:Name="newWorkspaceBtn" Header="New Workspace" Click="NewWorkspace_Click" />
-                        <RibbonApplicationMenuItem x:Name="loadWorkspaceBtn" Header="Load Workspace" Click="LoadWorkspace_Click"/>
-                        <RibbonApplicationMenuItem x:Name="saveWorkspaceBtn" Header="Save Workspace" Click="SaveWorkspaceBtn_Click" IsEnabled="False" />
-                        <RibbonApplicationMenuItem x:Name="closeWorkspaceBtn" Header="Close Workspace" Click="CloseWorkspaceBtn_Click" IsEnabled="False" />
+                        <RibbonApplicationMenuItem x:Name="NewWorkspaceBtn" Header="New Workspace" Click="NewWorkspace_Click" />
+                        <RibbonApplicationMenuItem x:Name="LoadWorkspaceBtn" Header="Load Workspace" Click="LoadWorkspace_Click"/>
+                        <RibbonApplicationMenuItem x:Name="SaveWorkspaceBtn" Header="Save Workspace" Click="SaveWorkspaceBtn_Click" IsEnabled="False" />
+                        <RibbonApplicationMenuItem x:Name="CloseWorkspaceBtn" Header="Close Workspace" Click="CloseWorkspaceBtn_Click" IsEnabled="False" />
                         <RibbonSeparator />
                         <RibbonApplicationMenuItem Header="Preferences" />
-                        <RibbonApplicationMenuItem Header="Close" />
+                        <RibbonApplicationMenuItem Header="Close" Click="Close_OnClick"/>
                     </RibbonApplicationMenu>
                 </Ribbon.ApplicationMenu>
-                <RibbonTab x:Name="generalTab" Header="General">
+                <RibbonTab Header="General">
                     <RibbonGroup Header="ChaosShell">
                         <RibbonButton Label="New Window" LargeImageSource="/Images/cs_icon.png" Click="NewChaosShell_Click" />
                         <RibbonButton Label="Show ChaosShell" />
@@ -40,29 +40,48 @@
                         
                     </RibbonGroup>
                 </RibbonTab>
-                <RibbonTab x:Name="workspaceTab" Header="Workspace" Visibility="Hidden">
+                <RibbonTab x:Name="WorkspaceTab" Header="Workspace" Visibility="Hidden">
                     <RibbonGroup Header="Path Configuration">
-                        <RibbonButton x:Name="configureWorkspaceBtn" Label="Configure Workspace" Click="ConfigureWorkspaceBtn_Click" />
-                        <RibbonButton Label="Set VProject" />
-                        <RibbonButton Label="Open Working Dir" />
+                        <RibbonButton Label="Configure Workspace" Click="ConfigureWorkspaceBtn_Click" />
+                        <RibbonButton Label="Open Working Dir" Click="OpenWorkingDir_OnClick" />
                     </RibbonGroup>
-                    <RibbonGroup Header="Engine Branch">
-                        <RibbonButton Label="Launch Source" LargeImageSource="/Images/source/hl2.ico" />
-                        <RibbonButton Label="Set Launch Parameters" />
-                        <RibbonButton Label="Set Game Directory" />
+                    <RibbonGroup x:Name="EngineBranch" Header="Engine Branch" IsEnabled="False">
+                        <RibbonButton Label="Launch Source" LargeImageSource="/Images/source/hl2.ico" Click="LaunchSource_OnClick" />
+                        <RibbonButton Label="Set Launch Parameters" Click="ConfigureWorkspaceBtn_Click" />
                     </RibbonGroup>
                     
-                    <RibbonGroup x:Name="p4group" Header="Perforce" Visibility="Hidden">
-                        <RibbonButton x:Name="p4v" Label="Open P4V" LargeImageSource="/Images/perforce/p4v.png" Click="P4open_Click" IsEnabled="False" />
-                        <RibbonButton x:Name="p4submit" Label="Submit" SmallImageSource="/Images/perforce/submit.png" IsEnabled="False" />
-                        <RibbonButton x:Name="p4diff" Label="Diff" SmallImageSource="/Images/perforce/diff.png" IsEnabled="False" />
-                        <RibbonButton x:Name="p4revert" Label="Revert" SmallImageSource="/Images/perforce/revert.png" IsEnabled="False" />
-                        <RibbonButton x:Name="p4checkout" Label="Check Out" SmallImageSource="/Images/perforce/checkout.png" IsEnabled="False" />
-                        <RibbonButton x:Name="p4merge" Label="Open P4Merge" SmallImageSource="/Images/perforce/p4m.png" Click="P4merge_Click" IsEnabled="False" />
-                        <RibbonButton x:Name="p4admin" Label="Open P4Admin" SmallImageSource="/Images/perforce/p4a.png" Click="P4admin_Click" IsEnabled="False" />
+                    <RibbonGroup x:Name="P4Group" Header="Perforce" Visibility="Hidden">
+                        <RibbonButton x:Name="P4V" Label="Open P4V" LargeImageSource="/Images/perforce/p4v.png" Click="P4open_Click" IsEnabled="False" />
+                        <RibbonButton x:Name="P4Submit" Label="Submit" SmallImageSource="/Images/perforce/submit.png" IsEnabled="False" />
+                        <RibbonButton x:Name="P4Diff" Label="Diff" SmallImageSource="/Images/perforce/diff.png" IsEnabled="False" />
+                        <RibbonButton x:Name="P4Revert" Label="Revert" SmallImageSource="/Images/perforce/revert.png" IsEnabled="False" />
+                        <RibbonButton x:Name="P4Checkout" Label="Check Out" SmallImageSource="/Images/perforce/checkout.png" IsEnabled="False" />
+                        <RibbonButton x:Name="P4Merge" Label="Open P4Merge" SmallImageSource="/Images/perforce/p4m.png" Click="P4merge_Click" IsEnabled="False" />
+                        <RibbonButton x:Name="P4Admin" Label="Open P4Admin" SmallImageSource="/Images/perforce/p4a.png" Click="P4admin_Click" IsEnabled="False" />
                     </RibbonGroup>
                 </RibbonTab>
-                <RibbonTab x:Name="developerTab" Header="Developer">
+                <RibbonTab x:Name="ToolsTab" Header="Tools" Visibility="Hidden">
+                    <RibbonGroup Header="Maps and Addons">
+                        <RibbonButton Label="Open Hammer" LargeImageSource="/Images/source/hammer.ico" Click="OpenHammer_OnClick" />
+                        <RibbonButton Label="Open Hammer in Foundry" SmallImageSource="/Images/source/hammer.ico" Click="OpenFoundry_OnClick" />
+                        <RibbonButton Label="Open Commentary Editor" SmallImageSource="/Images/source/mfc.ico" Click="OpenCommentaryEditor_OnClick" />
+                        <RibbonButton Label="Open Map Publisher" SmallImageSource="/Images/source/publish.ico" Click="PublishMap_OnClick" />
+                    </RibbonGroup>
+                    <RibbonGroup Header="Models and Textures">
+                        <RibbonButton Label="Open Model Viewer" LargeImageSource="/Images/source/hlmv.ico" Click="OpenHlmv_OnClick" />
+                        <RibbonButton Label="Open Model Browser" LargeImageSource="/Images/source/hlmv.ico" Click="OpenModelBrowser_OnClick" />
+                        <RibbonButton Label="Open QC Eyes" SmallImageSource="/Images/source/mfc.ico" Click="OpenQCEyes_OnClick" />
+                        <RibbonButton Label="Open Particle Editor" SmallImageSource="/Images/source/mfc.ico" Click="OpenParticleEditor_OnClick" />
+                        <RibbonButton Label="Open VMT Editor" SmallImageSource="/Images/source/mfc.ico" Click="OpenVMTEditor_OnClick" />
+                    </RibbonGroup>
+                    <RibbonGroup Header="Scenes and Rigging">
+                        <RibbonButton Label="Open Face Poser" LargeImageSource="/Images/source/hlfaceposer.ico" Click="OpenFacePoser_OnClick" />
+                        <RibbonButton Label="Open Scene Manager" SmallImageSource="/Images/source/scenemanager.ico" Click="OpenSceneManager_OnClick" />
+                        <RibbonButton Label="Open Scene Viewer" SmallImageSource="/Images/source/mfc.ico" Click="OpenSceneViewer_OnClick" />
+                        <RibbonButton Label="Open Element Viewer" SmallImageSource="/Images/source/mfc.ico" Click="OpenElementViewer_OnClick" />
+                    </RibbonGroup>
+                </RibbonTab>
+                <RibbonTab x:Name="DeveloperTab" Header="Developer">
                     <RibbonButton Label="Set workspace dirty" Click="RibbonButton_Click" />
                     <RibbonButton Label="Add cmdlet block" Click="AddCmdletWidget_Click" />
                     <RibbonButton Label="Add script block" Click="AddScriptWidget_Click" />
@@ -77,10 +96,15 @@
                 <RowDefinition Height="5" />
                 <RowDefinition Height="150" />
             </Grid.RowDefinitions>
-            <Canvas x:Name="canvas" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" >
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="200" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <TreeView x:Name="FileSelector" Grid.Row="1" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+            <Canvas x:Name="Canvas" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" >
             </Canvas>
-            <GridSplitter Grid.Row="2" HorizontalAlignment="Stretch" VerticalAlignment="Center" Height="5" />
-            <controls:ChaosShell x:Name="chaosShell" HorizontalAlignment="Stretch" Grid.Row="3" VerticalAlignment="Stretch"  />
+            <GridSplitter Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" VerticalAlignment="Center" Height="5" />
+            <controls:ChaosShell x:Name="ChaosShell" HorizontalAlignment="Stretch" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" VerticalAlignment="Stretch"  />
         </Grid>
     </Grid>
 </RibbonWindow>

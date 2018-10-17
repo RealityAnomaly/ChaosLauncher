@@ -2,6 +2,8 @@
 using Gameloop.Vdf.Linq;
 using Microsoft.Extensions.Logging;
 using Microsoft.Win32;
+using SourceLauncher.Models;
+using SourceLauncher.Utilities;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -11,10 +13,11 @@ using System.Threading.Tasks;
 
 namespace SourceLauncher.Services
 {
-    class SteamService : BaseService
+    internal class SteamService : BaseService
     {
-        private VProperty vdf;
-        private IList<string> libraryPaths = new List<string>();
+        private VProperty _configVdf;
+        private readonly IList<string> _libraryPaths = new List<string>();
+        public readonly IList<SourceGame> SourceGames = new List<SourceGame>();
 
         public SteamService(IServiceProvider serviceProvider) : base(serviceProvider)
         {
@@ -23,56 +26,85 @@ namespace SourceLauncher.Services
 
         private void ReloadAllSteam()
         {
-            libraryPaths.Clear();
+            _libraryPaths.Clear();
+
+            // Retrieve Steam configuration to find Steam config files and default dir
             LoadSteamConfig();
+            // Load library paths from Steam config files
             LoadLibraryPaths();
+            // Scan libraries for Source games
+            LoadSourceGames();
         }
 
         private void LoadSteamConfig()
         {
-            logger.LogInformation("Loading Steam system configuration.");
-            RegistryKey steamKey = Registry.CurrentUser.OpenSubKey(@"Software\Valve\Steam");
+            Logger.LogInformation("Loading Steam system configuration.");
+            var steamKey = Registry.CurrentUser.OpenSubKey(@"Software\Valve\Steam");
 
             if (steamKey == null)
             {
-                logger.LogError("Steam could not be detected from the registry.");
+                Logger.LogError("Steam could not be detected from the registry.");
                 return;
             }
 
-            string installDir = (string) steamKey.GetValue("SteamPath");
-            logger.LogInformation(String.Format("Found Steam at {0}", installDir));
+            var installDir = (string) steamKey.GetValue("SteamPath");
+            Logger.LogInformation($"Found Steam at {installDir}");
 
-            libraryPaths.Add(installDir);
+            _libraryPaths.Add(Path.Combine(installDir, @"steamapps\common"));
 
             try
             {
-                vdf = VdfConvert.Deserialize(File.ReadAllText(String.Format("{0}/config/config.vdf", installDir)));
+                _configVdf = VdfConvert.Deserialize(File.ReadAllText($@"{installDir}\config\config.vdf"));
             }
             catch (Exception e)
             {
-                logger.LogError(e, "Encountered an exception while reading the VDF. Steam configuration will not be loaded.");
+                Logger.LogError(e, "Encountered an exception while reading the VDF. Steam configuration will not be loaded.");
                 return;
             }
 
-            logger.LogInformation("Steam configuration loaded successfully.");
+            Logger.LogInformation("Steam configuration loaded successfully.");
         }
 
         private void LoadLibraryPaths()
         {
-            if (vdf == null)
+            if (_configVdf == null)
             {
-                logger.LogError("VDF is not loaded. Cannot load library paths.");
+                Logger.LogError("VDF is not loaded. Cannot load library paths.");
                 return;
             }
 
-            foreach (VProperty key in vdf.Value["Software"]["Valve"]["Steam"])
+            foreach (var vToken in _configVdf.Value["Software"]["Valve"]["Steam"])
             {
+                var key = (VProperty) vToken;
                 if (!key.Key.Contains("BaseInstallFolder_"))
                     continue;
 
-                logger.LogInformation(String.Format("Found additional Steam library at {0}", key.Value.ToString()));
-                libraryPaths.Add(key.Value.ToString());
+                Logger.LogInformation($"Found additional Steam library at {key.Value}");
+                _libraryPaths.Add(Path.Combine(key.Value.ToString(), @"steamapps\common"));
             }
+        }
+
+        private void LoadSourceGames()
+        {
+            foreach (var path in _libraryPaths)
+            {
+                IList<string> steamApps = Directory.GetDirectories(path);
+                foreach (var steamApp in steamApps)
+                {
+                    var game = ScanSteamApp(steamApp);
+                    if (game == null) continue;
+
+                    Logger.LogInformation($"Found Source game {game.ProductName} with appID {game.AppId}.");
+                    SourceGames.Add(game);
+                }
+            }
+        }
+
+        private static SourceGame ScanSteamApp(string steamApp)
+        {
+            IList<string> contentDirs = Directory.GetDirectories(steamApp);
+            return (from contentDir in contentDirs from contentFile in Directory.GetFiles(contentDir) where Path.GetFileName(contentFile) == ("steam.inf")
+                select new SourceGame() {ProductName = Path.GetFileName(steamApp), ContentDir = contentDir, AppId = SteamParser.ParseSteamInf(File.ReadAllLines(contentFile))["appID"]}).FirstOrDefault();
         }
     }
 }

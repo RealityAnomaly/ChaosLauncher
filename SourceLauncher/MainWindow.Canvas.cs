@@ -3,47 +3,41 @@ using SourceLauncher.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Management.Automation;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Ribbon;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Shapes;
 
 namespace SourceLauncher
 {
-    public partial class MainWindow : RibbonWindow
+    public partial class MainWindow
     {
-        private bool isDragging = false;
-        private bool isTargeting = false;
-        private Point dragPoint;
-        private UIElement targetSource;
-        private ToolControl lastSelected;
+        private bool _isDragging;
+        private bool _isTargeting;
+        private Point _dragPoint;
+        private UIElement _targetSource;
+        private ToolControl _lastSelected;
 
-        private List<Action> undoList = new List<Action>();
-        private List<Action> redoList = new List<Action>();
+        private readonly IList<Action> _undoList = new List<Action>();
+        private readonly IList<Action> _redoList = new List<Action>();
 
         private void Undo()
         {
-            Action undoAction = undoList.First();
-            redoList.Add(undoAction);
-            undoList.Remove(undoAction);
+            var undoAction = _undoList.First();
+            _redoList.Add(undoAction);
+            _undoList.Remove(undoAction);
         }
 
         private void Redo()
         {
-            Action lastAction = redoList.First();
-            redoList.Remove(lastAction);
-            undoList.Add(lastAction);
+            var lastAction = _redoList.First();
+            _redoList.Remove(lastAction);
+            _undoList.Add(lastAction);
         }
 
         private void NewCmdletWidget()
         {
-            CmdletTool newTool = CmdletTool.PickTool(chaosShell);
+            var newTool = CmdletTool.PickTool(ChaosShell);
             if (newTool == null)
                 return;
 
@@ -62,7 +56,7 @@ namespace SourceLauncher
 
         private void NewExternalWidget()
         {
-            ExternalTool newTool = ExternalTool.PickTool();
+            var newTool = ExternalTool.PickTool();
             if (newTool == null)
                 return;
 
@@ -71,19 +65,17 @@ namespace SourceLauncher
 
         private void AddToolWidget(Tool tool)
         {
-            ToolControl toolControl = new ToolControl(chaosShell, tool);
+            var toolControl = new ToolControl(ChaosShell, tool);
             AddWidgetToCanvas(toolControl);
         }
 
         private void StopTargeting()
         {
-            isTargeting = false;
-            targetSource = null;
+            _isTargeting = false;
+            _targetSource = null;
 
-            if (lastSelected != null)
-                lastSelected.SetSelected(false);
-
-            lastSelected = null;
+            _lastSelected?.SetSelected(false);
+            _lastSelected = null;
 
             Mouse.OverrideCursor = null;
         }
@@ -99,7 +91,7 @@ namespace SourceLauncher
             Canvas.SetLeft(widget, 0);
             Canvas.SetTop(widget, 0);
 
-            canvas.Children.Add(widget);
+            Canvas.Children.Add(widget);
         }
 
         private void Widget_MouseOverChanged(object sender, MouseEventArgs e)
@@ -107,19 +99,18 @@ namespace SourceLauncher
             if (sender.GetType() != typeof(ToolControl))
                 return;
 
-            if (isTargeting && sender != targetSource)
-            {
-                ToolControl element = sender as ToolControl;
+            if (!_isTargeting || sender.Equals(_targetSource)) return;
 
-                if (element.IsMouseOver)
-                {
-                    element.SetSelected(true);
-                    lastSelected = element;
-                }
-                else
-                {
-                    element.SetSelected(false);
-                }
+            var element = sender as ToolControl;
+
+            if (element != null && element.IsMouseOver)
+            {
+                element.SetSelected(true);
+                _lastSelected = element;
+            }
+            else
+            {
+                element?.SetSelected(false);
             }
         }
 
@@ -128,20 +119,19 @@ namespace SourceLauncher
             if (sender.GetType() != typeof(ToolControl))
                 return;
 
-            isDragging = false;
-            ToolControl element = sender as ToolControl;
-            element.ReleaseMouseCapture();
-
-            element.UpdateConnections();
+            _isDragging = false;
+            var element = sender as ToolControl;
+            element?.ReleaseMouseCapture();
+            element?.UpdateConnections();
 
             IList<ToolControl> toUpdate = new List<ToolControl>();
-            foreach (UIElement obj in canvas.Children)
+            foreach (UIElement obj in Canvas.Children)
             {
                 if (obj is ToolControl tool)
                     toUpdate.Add(tool);
             }
 
-            foreach (ToolControl control in toUpdate)
+            foreach (var control in toUpdate)
             {
                 control.UpdateConnections();
             }
@@ -152,43 +142,39 @@ namespace SourceLauncher
             if (sender.GetType() != typeof(ToolControl))
                 return;
 
-            if (isTargeting && sender != targetSource)
+            if (_isTargeting && !sender.Equals(_targetSource))
             {
                 StopTargeting();
             }
 
-            if (!isTargeting && Keyboard.IsKeyDown(Key.LeftShift))
+            if (!_isTargeting && Keyboard.IsKeyDown(Key.LeftShift))
             {
-                targetSource = sender as UIElement;
+                _targetSource = sender as UIElement;
                 Mouse.OverrideCursor = Cursors.Cross;
-                isTargeting = true;
+                _isTargeting = true;
                 return;
             }
 
-            isDragging = true;
-            ToolControl element = sender as ToolControl;
-            dragPoint = e.GetPosition(element);
-            element.CaptureMouse();
+            _isDragging = true;
+            var element = sender as ToolControl;
+            _dragPoint = e.GetPosition(element);
+            element?.CaptureMouse();
         }
 
         private void Widget_MouseMove(object sender, MouseEventArgs e)
         {
-            UIElement element = sender as UIElement;
+            if (!_isDragging || !(sender is UIElement element)) return;
 
-            if (isDragging && element != null)
+            var newPoint = e.GetPosition(Canvas);
+
+            if (!(element.RenderTransform is TranslateTransform transform))
             {
-                Point newPoint = e.GetPosition(canvas);
-
-                TranslateTransform transform = element.RenderTransform as TranslateTransform;
-                if (transform == null)
-                {
-                    transform = new TranslateTransform();
-                    element.RenderTransform = transform;
-                }
-
-                transform.X = newPoint.X - dragPoint.X;
-                transform.Y = newPoint.Y - dragPoint.Y;
+                transform = new TranslateTransform();
+                element.RenderTransform = transform;
             }
+
+            transform.X = newPoint.X - _dragPoint.X;
+            transform.Y = newPoint.Y - _dragPoint.Y;
         }
     }
 }

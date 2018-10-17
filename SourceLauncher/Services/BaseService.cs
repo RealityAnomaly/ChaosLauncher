@@ -8,14 +8,15 @@ using Microsoft.Extensions.Logging;
 
 namespace SourceLauncher.Services
 {
-    class BaseService
+    internal class BaseService
     {
-        protected readonly IServiceProvider serviceProvider;
-        protected readonly ILogger logger;
-        public BaseService(IServiceProvider serviceProvider)
+        private readonly IServiceProvider _serviceProvider;
+        protected readonly ILogger Logger;
+
+        internal BaseService(IServiceProvider serviceProvider)
         {
-            this.serviceProvider = serviceProvider;
-            logger = serviceProvider.GetService<ILoggerFactory>().CreateLogger(GetType());
+            _serviceProvider = serviceProvider;
+            Logger = serviceProvider.GetService<ILoggerFactory>().CreateLogger(GetType());
         }
     }
 }

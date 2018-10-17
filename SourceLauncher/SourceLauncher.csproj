@@ -167,10 +167,14 @@
     <Compile Include="Converters.cs" />
     <Compile Include="Exceptions.cs" />
     <Compile Include="MainWindow.Canvas.cs" />
+    <Compile Include="MainWindow.Tools.cs" />
     <Compile Include="MainWindow.Workspaces.cs" />
+    <Compile Include="Models\EngineTool.cs" />
     <Compile Include="Models\OutputReference.cs" />
-    <Compile Include="Models\DragInfo.cs" />
     <Compile Include="Models\ExternalTool.cs" />
+    <Compile Include="Models\SourceGame.cs" />
+    <Compile Include="Models\SourceParameters.cs" />
+    <Compile Include="Utilities\SteamParser.cs" />
     <Compile Include="Models\Tool.cs" />
     <Compile Include="Models\Output.cs" />
     <Compile Include="Models\Parameter.cs" />
@@ -323,6 +327,22 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\ps_icon_lg.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\source\hammer.ico" />
+    <Resource Include="Images\source\hlfaceposer.ico" />
+    <Resource Include="Images\source\hlmv.ico" />
+    <Resource Include="Images\source\mfc.ico" />
+    <Resource Include="Images\source\sdk.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\source\publish.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\source\scenemanager.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\source\vconfig.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

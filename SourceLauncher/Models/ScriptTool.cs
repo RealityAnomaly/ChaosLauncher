@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SourceLauncher.Models
+﻿namespace SourceLauncher.Models
 {
-    class ScriptTool : Tool
+    internal class ScriptTool : Tool
     {
+        /// <inheritdoc />
         public ScriptTool(string name) : base(name) { }
     }
 }

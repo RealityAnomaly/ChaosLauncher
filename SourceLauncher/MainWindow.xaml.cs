@@ -1,36 +1,23 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.EventLog;
-using SourceLauncher.Models;
 using SourceLauncher.Services;
 using SourceLauncher.Windows;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Diagnostics;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Controls.Ribbon;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace SourceLauncher
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : RibbonWindow
+    public partial class MainWindow
     {
-        private IServiceProvider serviceProvider;
-        private SteamService steamService;
-        private PerforceService perforceService;
+        private readonly IServiceProvider _serviceProvider;
+        private readonly PerforceService _perforceService;
+        private readonly SteamService _steamService;
         public MainWindow()
         {
             InitializeComponent();
@@ -44,23 +31,23 @@ namespace SourceLauncher
             services.AddSingleton(loggerFactory);
             services.AddSingleton(typeof(SteamService));
             services.AddSingleton(typeof(PerforceService));
-            serviceProvider = services.BuildServiceProvider();
+            _serviceProvider = services.BuildServiceProvider();
 
             // Prepare services for use by the main window
-            steamService = serviceProvider.GetService<SteamService>();
-            perforceService = serviceProvider.GetService<PerforceService>();
+            _steamService = _serviceProvider.GetService<SteamService>();
+            _perforceService = _serviceProvider.GetService<PerforceService>();
 
-            if (perforceService.p4Exists)
+            if (_perforceService.P4Exists)
             {
-                p4v.IsEnabled = true;
-                p4merge.IsEnabled = true;
-                p4admin.IsEnabled = true;
+                P4V.IsEnabled = true;
+                P4Merge.IsEnabled = true;
+                P4Admin.IsEnabled = true;
             }
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            if (currentWorkspace != null && !CloseWorkspace())
+            if (_currentWorkspace != null && !CloseWorkspace())
                 e.Cancel = true;
         }
 
@@ -71,28 +58,28 @@ namespace SourceLauncher
 
         private void P4open_Click(object sender, RoutedEventArgs e)
         {
-            perforceService.RunP4Tool("p4v");
+            _perforceService.RunP4Tool("p4v");
         }
 
         private void P4merge_Click(object sender, RoutedEventArgs e)
         {
-            perforceService.RunP4Tool("p4merge");
+            _perforceService.RunP4Tool("p4merge");
         }
 
         private void P4admin_Click(object sender, RoutedEventArgs e)
         {
-            perforceService.RunP4Tool("p4admin");
+            _perforceService.RunP4Tool("p4admin");
         }
 
         private void LoadWorkspace_Click(object sender, RoutedEventArgs e)
         {
-            using(System.Windows.Forms.OpenFileDialog dialog = new System.Windows.Forms.OpenFileDialog())
+            using(var dialog = new System.Windows.Forms.OpenFileDialog())
             {
                 dialog.CheckFileExists = true;
-                dialog.Filter = "Workspace Files (*.json)|*.json";
+                dialog.Filter = @"Workspace Files (*.json)|*.json";
                 dialog.FileName = "workspace.json";
-                dialog.Title = "Select your workspace.json file.";
-                System.Windows.Forms.DialogResult dr = dialog.ShowDialog();
+                dialog.Title = @"Select your workspace.json file.";
+                var dr = dialog.ShowDialog();
 
                 if (dr != System.Windows.Forms.DialogResult.OK)
                     return;
@@ -103,12 +90,12 @@ namespace SourceLauncher
 
         private void NewWorkspace_Click(object sender, RoutedEventArgs e)
         {
-            using (System.Windows.Forms.SaveFileDialog dialog = new System.Windows.Forms.SaveFileDialog())
+            using (var dialog = new System.Windows.Forms.SaveFileDialog())
             {
-                dialog.Filter = "Workspace Files (*.json)|*.json";
+                dialog.Filter = @"Workspace Files (*.json)|*.json";
                 dialog.FileName = "workspace.json";
-                dialog.Title = "Save this in your workspace folder.";
-                System.Windows.Forms.DialogResult dr = dialog.ShowDialog();
+                dialog.Title = @"Save this in your workspace folder.";
+                var dr = dialog.ShowDialog();
 
                 if (dr != System.Windows.Forms.DialogResult.OK)
                     return;
@@ -129,11 +116,11 @@ namespace SourceLauncher
 
         private void ConfigureWorkspaceBtn_Click(object sender, RoutedEventArgs e)
         {
-            Window workspaceSettingsWindow = new WorkspaceSettingsWindow(serviceProvider, chaosShell, currentWorkspace);
+            Window workspaceSettingsWindow = new WorkspaceSettingsWindow(_serviceProvider, ChaosShell, _currentWorkspace);
             workspaceSettingsWindow.ShowDialog();
 
-            if (currentWorkspace.UnappliedChanges)
-                OpenWorkspace(currentWorkspace);
+            if (_currentWorkspace.UnappliedChanges)
+                OpenWorkspace(_currentWorkspace);
         }
 
         private void NewChaosShell_Click(object sender, RoutedEventArgs e)

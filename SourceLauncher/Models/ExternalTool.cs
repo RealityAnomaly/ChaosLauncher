@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.IO;
 
 namespace SourceLauncher.Models
 {
-    class ExternalTool : Tool
+    internal class ExternalTool : Tool
     {
-        public ExternalTool(string name) : base(name)
+        private ExternalTool(string name) : base(name)
         {
 
         }
@@ -21,17 +16,17 @@ namespace SourceLauncher.Models
 
         public static ExternalTool PickTool()
         {
-            using (System.Windows.Forms.OpenFileDialog dialog = new System.Windows.Forms.OpenFileDialog())
+            using (var dialog = new System.Windows.Forms.OpenFileDialog())
             {
                 dialog.CheckFileExists = true;
-                dialog.Filter = "Executable Files|*.exe;*.com;*.scr|Batch Scripts|*.bat;*.cmd|Python Scripts|*.py";
-                dialog.Title = "Select the executable to use as an external tool.";
-                System.Windows.Forms.DialogResult dr = dialog.ShowDialog();
+                dialog.Filter = @"Executable Files|*.exe;*.com;*.scr|Batch Scripts|*.bat;*.cmd|Python Scripts|*.py";
+                dialog.Title = @"Select the executable to use as an external tool.";
+                var dr = dialog.ShowDialog();
 
                 if (dr != System.Windows.Forms.DialogResult.OK)
                     return null;
 
-                ExternalTool tool = new ExternalTool(dialog.FileName);
+                var tool = new ExternalTool(dialog.FileName);
                 return tool;
             }
         }

@@ -1,30 +1,26 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SourceLauncher.Models
 {
-    public class Tool : INotifyPropertyChanged
+    public abstract class Tool : INotifyPropertyChanged
     {
-        private string name;
-        private string nickname;
-        public string Name { get { return name; } set { name = value; OnPropertyChanged("Name"); } }
-        public string Nickname { get { return nickname; } set { nickname = value; OnPropertyChanged("Nickname"); } }
+        private string _name;
+        private string _nickname;
+        public string Name { get => _name; set { _name = value; OnPropertyChanged("Name"); } }
+        public string Nickname { get => _nickname; set { _nickname = value; OnPropertyChanged("Nickname"); } }
         public Guid Identifier { get; set; } = Guid.NewGuid();
         public readonly ObservableCollection<Parameter> Parameters = new ObservableCollection<Parameter>();
         public readonly ObservableCollection<Output> Outputs = new ObservableCollection<Output>();
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public Tool(string name)
+        internal Tool(string name)
         {
             Name = name;
             Nickname = GetShortName();
-            Outputs.Add(new Output(null));
+            Outputs.Add(new Output());
         }
 
         public override string ToString()

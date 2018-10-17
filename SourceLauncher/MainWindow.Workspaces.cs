@@ -1,21 +1,16 @@
 ﻿using SourceLauncher.Models;
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls.Ribbon;
 
 namespace SourceLauncher
 {
-    public partial class MainWindow : RibbonWindow
+    public partial class MainWindow
     {
-        private Workspace currentWorkspace;
+        private Workspace _currentWorkspace;
         private void OpenWorkspace(string fileName)
         {
-            Workspace workspace = Workspace.Open(fileName);
+            var workspace = Workspace.Open(fileName);
 
             if (workspace == null)
             {
@@ -28,70 +23,84 @@ namespace SourceLauncher
 
         private void OpenWorkspace(Workspace workspace)
         {
-            if (chaosShell.IsExecuting)
+            if (ChaosShell.IsExecuting)
             {
                 MessageBox.Show((string)Application.Current.FindResource("chaosShellExecuting"), "ChaosShell", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
-            if (currentWorkspace != null && workspace.Identifier != currentWorkspace.Identifier)
+            if (_currentWorkspace != null && workspace.Identifier != _currentWorkspace.Identifier)
                 CloseWorkspace();
 
-            currentWorkspace = workspace;
+            _currentWorkspace = workspace;
 
             Task.Run(() =>
             {
-                chaosShell.InvokeScript(String.Format("Set-VWorkspace -Path \"{0}\"", new FileInfo(currentWorkspace.LoadedPath).Directory.FullName));
+                ChaosShell.InvokeScript(
+                    $"Set-VWorkspace -Path \"{new FileInfo(_currentWorkspace.LoadedPath).Directory?.FullName}\"");
+
+                // No longer required since we've embedded this into process start
+                /**
+                if (_currentWorkspace.SourceGame != null)
+                    ChaosShell.InvokeScript(
+                        $"Set-VProject -Path \"{_currentWorkspace.SourceGame.ContentDir}\"");*/
             });
 
-            workspaceTab.Visibility = Visibility.Visible;
-            saveWorkspaceBtn.IsEnabled = true;
-            closeWorkspaceBtn.IsEnabled = true;
+            WorkspaceTab.Visibility = Visibility.Visible;
+            SaveWorkspaceBtn.IsEnabled = true;
+            CloseWorkspaceBtn.IsEnabled = true;
+            Title = $"Chaos Launcher - {_currentWorkspace.Name}";
 
-            if (workspace.PerforceEnabled)
+            // Show tools relating to the Source game,
+            // only if the user has actually defined one in Workspace Options.
+            if (workspace.SourceGame != null)
             {
-                p4group.Visibility = Visibility.Visible;
-            }
-            else
-            {
-                p4group.Visibility = Visibility.Hidden;
+                EngineBranch.IsEnabled = true;
+                ToolsTab.Visibility = Visibility.Visible;
             }
 
-            Title = String.Format("Chaos Launcher - {0}", currentWorkspace.Name);
+            // Show Perforce version control if P4 is enabled on the workspace.
+            P4Group.Visibility = workspace.PerforceEnabled ? Visibility.Visible : Visibility.Hidden;
         }
 
         private bool CloseWorkspace()
         {
-            if (chaosShell.IsExecuting)
+            if (ChaosShell.IsExecuting)
             {
                 MessageBox.Show((string)Application.Current.FindResource("chaosShellExecuting"), "ChaosShell", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
 
-            if (currentWorkspace.UnsavedChanges)
+            if (_currentWorkspace.UnsavedChanges)
             {
-                MessageBoxResult result = MessageBox.Show("Save changes to the workspace?", "Workspace", MessageBoxButton.YesNoCancel, MessageBoxImage.Question, MessageBoxResult.Yes);
-
-                switch(result)
+                var result = MessageBox.Show("Save changes to the workspace?", "Workspace", MessageBoxButton.YesNoCancel, MessageBoxImage.Question, MessageBoxResult.Yes);
+                if (result != MessageBoxResult.Cancel)
                 {
-                    case MessageBoxResult.Yes:
+                    if (result == MessageBoxResult.Yes)
                         SaveWorkspace();
-                        break;
-                    case MessageBoxResult.Cancel:
-                        return false;
+                }
+                else
+                {
+                    return false;
                 }
             }
 
-            currentWorkspace = null;
+            _currentWorkspace = null;
 
             Task.Run(() =>
             {
-                chaosShell.InvokeScript("Set-VWorkspace -Clear");
+                ChaosShell.InvokeScript("Set-VWorkspace -Clear");
+
+                // No longer required since we've embedded this into process start
+                //ChaosShell.InvokeScript("Set-VProject -Clear");
             });
             
-            workspaceTab.Visibility = Visibility.Hidden;
-            saveWorkspaceBtn.IsEnabled = false;
-            closeWorkspaceBtn.IsEnabled = false;
+            WorkspaceTab.Visibility = Visibility.Hidden;
+            ToolsTab.Visibility = Visibility.Hidden;
+            SaveWorkspaceBtn.IsEnabled = false;
+            CloseWorkspaceBtn.IsEnabled = false;
+            EngineBranch.IsEnabled = false;
+
             Title = "Chaos Launcher";
 
             return true;
@@ -99,14 +108,19 @@ namespace SourceLauncher
 
         private void SaveWorkspace()
         {
-            currentWorkspace.Save();
+            _currentWorkspace.Save();
             Title = Title.TrimEnd('*');
         }
 
         private void SetUnsaved()
         {
-            currentWorkspace.UnsavedChanges = true;
+            _currentWorkspace.UnsavedChanges = true;
             Title = Title + "*";
+        }
+
+        private void Close_OnClick(object sender, RoutedEventArgs e)
+        {
+            Close();
         }
     }
 }

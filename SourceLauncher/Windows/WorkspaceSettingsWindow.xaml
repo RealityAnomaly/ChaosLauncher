@@ -3,16 +3,15 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:SourceLauncher.Windows"
-        xmlns:local1="clr-namespace:SourceLauncher"
+        xmlns:local="clr-namespace:SourceLauncher"
         mc:Ignorable="d"
         Title="Workspace Settings" Height="450" Width="800">
     <Window.Resources>
         <ResourceDictionary>
-            <local1:NegateBooleanConverter x:Key="inverter" />
+            <local:NegateBooleanConverter x:Key="Inverter" />
         </ResourceDictionary>
     </Window.Resources>
-    <Grid x:Name="mainGrid">
+    <Grid x:Name="MainGrid">
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
             <RowDefinition Height="40" />
@@ -39,14 +38,26 @@
             </TabItem>
             <TabItem Header="Flow"></TabItem>
             <TabItem Header="Source">
+                <Grid Background="#FFE5E5E5">
+                    <ComboBox HorizontalAlignment="Left" Margin="114,10,0,0" VerticalAlignment="Top" Width="200" x:Name="BranchSelector" SelectedItem="{Binding SourceGame}"/>
+                    <Label Content="Engine Branch" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top"/>
+                    <Label Content="You can select the engine branch to target here.&#10;If a branch is missing from this list, please ensure it is&#10; properly installed in Steam and restart Chaos Launcher." HorizontalAlignment="Left" Margin="10,37,0,0" VerticalAlignment="Top"/>
+                    <GroupBox Header="Launch Options" HorizontalAlignment="Left" Height="137" Margin="10,100,0,0" VerticalAlignment="Top" Width="304">
+                        <Grid>
+                            <Label Content="Additional Launch Parameters (separated by newline)" />
+                            <TextBox HorizontalAlignment="Left" Height="56" Margin="8,27,0,0" TextWrapping="NoWrap" VerticalScrollBarVisibility="Auto" AcceptsReturn="True" VerticalAlignment="Top" Width="274" Text="{Binding LaunchParameters}" />
+                            <Label Content="Caution: These parameters are applied globally." HorizontalAlignment="Left" Margin="10,83,0,0" VerticalAlignment="Top" Foreground="#FFD83F1D" Width="272"/>
+                        </Grid>
+                    </GroupBox>
 
+                </Grid>
             </TabItem>
             <TabItem Header="Perforce">
                 <Grid Background="#FFE5E5E5">
                     <CheckBox Content="Enable Perforce" HorizontalAlignment="Left" Margin="20,20,0,0" VerticalAlignment="Top" IsChecked="{Binding PerforceEnabled}" Click="Setting_Modified" />
                     <Label Content="This option enables Perforce integration for this workspace. Please note a Perforce Helix server is required.&#10;Chaos Launcher will attempt to autodetect your server settings, but you can override them here per-workspace." HorizontalAlignment="Left" Margin="20,40,0,0" VerticalAlignment="Top"/>
 
-                    <GroupBox Header="Server Configuration" HorizontalAlignment="Left" Height="163" Margin="20,92,0,0" VerticalAlignment="Top" Width="349" IsEnabled="{Binding Path=PerforceEnabled, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource inverter}}">
+                    <GroupBox Header="Server Configuration" HorizontalAlignment="Left" Height="163" Margin="20,92,0,0" VerticalAlignment="Top" Width="349" IsEnabled="{Binding Path=PerforceEnabled, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource Inverter}}">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="82*"/>
@@ -55,11 +66,14 @@
 
                             <Label Content="Server (P4PORT)" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.ColumnSpan="2" Margin="0,3,0,0"/>
                             <TextBox Text="{Binding PerforceServer}" HorizontalAlignment="Left" Height="23" Margin="83,3,0,0" VerticalAlignment="Top" Width="162" Grid.Column="1"/>
-                            <Label Content="User (P4USER)" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.ColumnSpan="2" Margin="0,31,0,0"/>
+                            <Label Content="User (P4USER)" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.ColumnSpan="2"
+                                   Grid.Column="0" Margin="0,31,0,0"/>
                             <TextBox Text="{Binding PerforceUser}" HorizontalAlignment="Left" Height="23" Margin="83,31,0,0" VerticalAlignment="Top" Width="162" Grid.Column="1"/>
-                            <Label Content="Workspace (P4CLIENT)" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.ColumnSpan="2" Margin="0,59,0,0"/>
+                            <Label Content="Workspace (P4CLIENT)" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.ColumnSpan="2"
+                                   Grid.Column="0" Margin="0,59,0,0"/>
                             <TextBox Text="{Binding PerforceClient}" HorizontalAlignment="Left" Height="23" Margin="83,59,0,0" VerticalAlignment="Top" Width="162" Grid.Column="1"/>
-                            <Label Content="Charset (P4CHARSET)" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.ColumnSpan="2" Margin="0,87,0,0"/>
+                            <Label Content="Charset (P4CHARSET)" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.ColumnSpan="2"
+                                   Grid.Column="0" Margin="0,87,0,0"/>
                             <TextBox Text="{Binding PerforceCharset}" HorizontalAlignment="Left" Height="23" Margin="84,87,0,0" VerticalAlignment="Top" Width="161" Grid.Column="1"/>
                             <Button Content="Test Configuration" HorizontalAlignment="Left" Margin="117,115,0,0" VerticalAlignment="Top" Width="128" Grid.Column="1" Click="TestPerforce_Click"/>
                         </Grid>
@@ -74,9 +88,9 @@
                 <ColumnDefinition Width="75" />
                 <ColumnDefinition Width="75" />
             </Grid.ColumnDefinitions>
-            <Button x:Name="saveBtn" Grid.Column="1" Content="Save" HorizontalAlignment="Left" Margin="-30,10,0,0" VerticalAlignment="Top" Width="75" Click="SaveBtn_Click" />
-            <Button x:Name="applyBtn" Grid.Column="2" Content="Apply" HorizontalAlignment="Left" Margin="-20,10,0,0" VerticalAlignment="Top" Width="75" Click="ApplyBtn_Click" IsEnabled="{Binding UnsavedChanges}" />
-            <Button x:Name="cancelBtn" Grid.Column="3" Content="Cancel" HorizontalAlignment="Left" Margin="-10,10,0,0" VerticalAlignment="Top" Width="75" Click="CancelBtn_Click" />
+            <Button Grid.Column="1" Content="Save" HorizontalAlignment="Left" Margin="-30,10,0,0" VerticalAlignment="Top" Width="75" Click="SaveBtn_Click" />
+            <Button x:Name="ApplyBtn" Grid.Column="2" Content="Apply" HorizontalAlignment="Left" Margin="-20,10,0,0" VerticalAlignment="Top" Width="75" Click="ApplyBtn_Click" IsEnabled="{Binding UnsavedChanges}" />
+            <Button Grid.Column="3" Content="Cancel" HorizontalAlignment="Left" Margin="-10,10,0,0" VerticalAlignment="Top" Width="75" Click="CancelBtn_Click" />
         </Grid>
     </Grid>
 </Window>

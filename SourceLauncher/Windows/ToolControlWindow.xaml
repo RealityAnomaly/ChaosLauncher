@@ -22,11 +22,11 @@
             <TabItem Header="General">
                 <Grid>
                     <Label Content="Block Nickname" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,10,0,0" />
-                    <TextBox HorizontalAlignment="Left" VerticalAlignment="Top" Margin="125,14,0,0" Width="216" Text="{Binding Nickname}" />
+                    <TextBox HorizontalAlignment="Left" VerticalAlignment="Top" Margin="125,14,0,0" Width="216" Text="{Binding Nickname}" x:Name="Nickname" />
 
                     <Label Content="Tool Reference" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,41,0,0" />
                     <TextBox HorizontalAlignment="Left" VerticalAlignment="Top" Margin="125,45,0,0" Width="153" Text="{Binding Name, Mode=OneWay}" IsReadOnly="True" />
-                    <Button HorizontalAlignment="Left" VerticalAlignment="Top" Content="Set Ref" Margin="283,45,0,0" Width="58" Height="18" FontSize="10" Click="SetTool_Click" />
+                    <Button HorizontalAlignment="Left" VerticalAlignment="Top" Content="Set Ref" Margin="283,45,0,0" Width="58" Height="18" FontSize="10" Click="SetTool_Click" x:Name="SetTool" />
 
                     <Label Content="Tool Type" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,72,0,0" />
                     <RadioButton x:Name="cmdletBtn" Content="Cmdlet" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="125,78,0,0" GroupName="ToolType" IsEnabled="False" />
