@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:SourceLauncher"
         xmlns:controls="clr-namespace:SourceLauncher.Controls"
         xmlns:ribbon="clr-namespace:System.Windows.Controls.Ribbon;assembly=System.Windows.Controls.Ribbon"
-        mc:Ignorable="d"
+              mc:Ignorable="d"
         Title="Chaos Launcher" Height="702" Width="1204"
         Closing="Window_Closing" Icon="/Images/cs_logo.png" KeyDown="RibbonWindow_KeyDown">
     <RibbonWindow.Resources>
@@ -28,7 +28,7 @@
                         <RibbonApplicationMenuItem x:Name="SaveWorkspaceBtn" Header="Save Workspace" Click="SaveWorkspaceBtn_Click" IsEnabled="False" />
                         <RibbonApplicationMenuItem x:Name="CloseWorkspaceBtn" Header="Close Workspace" Click="CloseWorkspaceBtn_Click" IsEnabled="False" />
                         <RibbonSeparator />
-                        <RibbonApplicationMenuItem Header="Preferences" />
+                        <RibbonApplicationMenuItem Header="Preferences" Click="Preferences_OnClick"/>
                         <RibbonApplicationMenuItem Header="Close" Click="Close_OnClick"/>
                     </RibbonApplicationMenu>
                 </Ribbon.ApplicationMenu>
@@ -60,25 +60,48 @@
                         <RibbonButton x:Name="P4Admin" Label="Open P4Admin" SmallImageSource="/Images/perforce/p4a.png" Click="P4admin_Click" IsEnabled="False" />
                     </RibbonGroup>
                 </RibbonTab>
-                <RibbonTab x:Name="ToolsTab" Header="Tools" Visibility="Hidden">
+                <RibbonTab x:Name="SourceTab" Header="Source" Visibility="Hidden">
                     <RibbonGroup Header="Maps and Addons">
-                        <RibbonButton Label="Open Hammer" LargeImageSource="/Images/source/hammer.ico" Click="OpenHammer_OnClick" />
-                        <RibbonButton Label="Open Hammer in Foundry" SmallImageSource="/Images/source/hammer.ico" Click="OpenFoundry_OnClick" />
-                        <RibbonButton Label="Open Commentary Editor" SmallImageSource="/Images/source/mfc.ico" Click="OpenCommentaryEditor_OnClick" />
-                        <RibbonButton Label="Open Map Publisher" SmallImageSource="/Images/source/publish.ico" Click="PublishMap_OnClick" />
+                        <RibbonButton Label="Hammer" LargeImageSource="/Images/source/hammer.ico" Click="OpenHammer_OnClick" />
+                        <RibbonButton Label="Hammer in Foundry" SmallImageSource="/Images/source/hammer.ico" Click="OpenFoundry_OnClick" />
+                        <RibbonButton Label="Commentary Editor" SmallImageSource="/Images/source/mfc.ico" Click="OpenCommentaryEditor_OnClick" />
+                        <RibbonButton Label="Map Publisher" SmallImageSource="/Images/source/publish.ico" Click="PublishMap_OnClick" />
                     </RibbonGroup>
                     <RibbonGroup Header="Models and Textures">
-                        <RibbonButton Label="Open Model Viewer" LargeImageSource="/Images/source/hlmv.ico" Click="OpenHlmv_OnClick" />
-                        <RibbonButton Label="Open Model Browser" LargeImageSource="/Images/source/hlmv.ico" Click="OpenModelBrowser_OnClick" />
-                        <RibbonButton Label="Open QC Eyes" SmallImageSource="/Images/source/mfc.ico" Click="OpenQCEyes_OnClick" />
-                        <RibbonButton Label="Open Particle Editor" SmallImageSource="/Images/source/mfc.ico" Click="OpenParticleEditor_OnClick" />
-                        <RibbonButton Label="Open VMT Editor" SmallImageSource="/Images/source/mfc.ico" Click="OpenVMTEditor_OnClick" />
+                        <RibbonButton Label="Model Viewer" LargeImageSource="/Images/source/hlmv.ico" Click="OpenHlmv_OnClick" />
+                        <RibbonButton Label="Model Browser" LargeImageSource="/Images/source/hlmv.ico" Click="OpenModelBrowser_OnClick" />
+                        <RibbonButton Label="QC Eyes" SmallImageSource="/Images/source/mfc.ico" Click="OpenQCEyes_OnClick" />
+                        <RibbonButton Label="Particle Editor" SmallImageSource="/Images/source/mfc.ico" Click="OpenParticleEditor_OnClick" />
+                        <RibbonButton Label="VMT Editor" SmallImageSource="/Images/source/mfc.ico" Click="OpenVMTEditor_OnClick" />
                     </RibbonGroup>
                     <RibbonGroup Header="Scenes and Rigging">
-                        <RibbonButton Label="Open Face Poser" LargeImageSource="/Images/source/hlfaceposer.ico" Click="OpenFacePoser_OnClick" />
-                        <RibbonButton Label="Open Scene Manager" SmallImageSource="/Images/source/scenemanager.ico" Click="OpenSceneManager_OnClick" />
-                        <RibbonButton Label="Open Scene Viewer" SmallImageSource="/Images/source/mfc.ico" Click="OpenSceneViewer_OnClick" />
-                        <RibbonButton Label="Open Element Viewer" SmallImageSource="/Images/source/mfc.ico" Click="OpenElementViewer_OnClick" />
+                        <RibbonButton Label="Face Poser" LargeImageSource="/Images/source/hlfaceposer.ico" Click="OpenFacePoser_OnClick" />
+                        <RibbonButton Label="Scene Manager" SmallImageSource="/Images/source/scenemanager.ico" Click="OpenSceneManager_OnClick" />
+                        <RibbonButton Label="Scene Viewer" SmallImageSource="/Images/source/mfc.ico" Click="OpenSceneViewer_OnClick" />
+                        <RibbonButton Label="Element Viewer" SmallImageSource="/Images/source/mfc.ico" Click="OpenElementViewer_OnClick" />
+                    </RibbonGroup>
+                </RibbonTab>
+                <RibbonTab x:Name="Source2Tab" Header="Source 2" Visibility="Hidden">
+                    <RibbonGroup Header="Maps and Addons">
+                        <RibbonButton Label="Hammer" LargeImageSource="/Images/source2/hammer.ico" Click="OpenHammer2_OnClick" />
+                        <RibbonButton Label="Workshop Manager" SmallImageSource="/Images/source2/workshopmanager.png" Click="OpenWorkshopManager2_OnClick" />
+                        <RibbonButton Label="Workshop Admin" SmallImageSource="/Images/source2/workshopadmin.png" Click="OpenWorkshopAdmin2_OnClick" />
+                    </RibbonGroup>
+                    <RibbonGroup Header="Assets">
+                        <RibbonButton Label="Asset Browser" LargeImageSource="/Images/source2/assetbrowser.ico" Click="OpenAssetBrowser2_OnClick" />
+                        <RibbonButton Label="Model Editor" LargeImageSource="/Images/source2/model_editor.ico" Click="OpenModelEditor2_OnClick" />
+                        <RibbonButton Label="Material Editor" LargeImageSource="/Images/source2/met.ico" Click="OpenMaterialEditor2_OnClick" />
+                        <RibbonButton Label="Particle Editor" LargeImageSource="/Images/source2/pet.ico" Click="OpenParticleEditor2_OnClick" />
+                        <RibbonButton Label="Model Doc Editor" SmallImageSource="/Images/source2/modeldoc_editor.ico" Click="OpenModelDocEditor2_OnClick" />
+                        <RibbonButton Label="Surface Property Editor" SmallImageSource="/Images/source2/surfacepropertyeditor.ico" Click="OpenSurfacePropertyEditor2_OnClick" />
+                        <RibbonButton Label="Shadergraph Editor" SmallImageSource="/Images/source2/shadergraph_editor.ico" Click="OpenShaderGraphEditor2_OnClick" />
+                    </RibbonGroup>
+                    <RibbonGroup Header="Scenes and Rigging">
+                        <RibbonButton Label="Face Poser" LargeImageSource="/Images/source2/faceposer.ico" Click="OpenFacePoser2_OnClick" />
+                    </RibbonGroup>
+                    <RibbonGroup Header="Development">
+                        <RibbonButton Label="VConsole" LargeImageSource="/Images/source2/vconsole.ico" Click="OpenVConsole2_OnClick" />
+                        <RibbonButton Label="Snooper" SmallImageSource="/Images/source2/snooper.png" Click="OpenSnooper2_OnClick" />
                     </RibbonGroup>
                 </RibbonTab>
                 <RibbonTab x:Name="DeveloperTab" Header="Developer">
@@ -96,15 +119,17 @@
                 <RowDefinition Height="5" />
                 <RowDefinition Height="150" />
             </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="200" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
-            <TreeView x:Name="FileSelector" Grid.Row="1" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
-            <Canvas x:Name="Canvas" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" >
-            </Canvas>
-            <GridSplitter Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" VerticalAlignment="Center" Height="5" />
-            <controls:ChaosShell x:Name="ChaosShell" HorizontalAlignment="Stretch" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" VerticalAlignment="Stretch"  />
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="250" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <controls:FileBrowser x:Name="FileSelector" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+                <Canvas x:Name="Canvas" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+            </Grid>
+            <GridSplitter Grid.Row="2" HorizontalAlignment="Stretch" VerticalAlignment="Center" Height="5" />
+            <pc:PoshConsole Grid.Row="3" xmlns:pc="http://schemas.poshcode.org/wpf/poshcode" x:Name="ChaosShell" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" FontFamily="Consolas" />
         </Grid>
     </Grid>
 </RibbonWindow>

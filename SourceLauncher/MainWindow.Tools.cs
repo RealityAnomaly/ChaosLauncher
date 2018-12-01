@@ -57,11 +57,11 @@ namespace SourceLauncher
         {
             if (_currentWorkspace.SourceGame.AppId.Equals("362890"))
             {
-                RunTool("blackmesa_publish");
+                RunTool("blackmesa_publish.exe");
             }
             else if (_currentWorkspace.SourceGame.AppId.Equals("620"))
             {
-                RunTool("p2map_publish");
+                RunTool("p2map_publish.exe");
             }
             else
             {
@@ -72,11 +72,21 @@ namespace SourceLauncher
         /// <summary>
         /// Runs a conventional executable tool.
         /// </summary>
-        private void RunTool(string tool)
+        private void RunTool(string tool, string arguments = "")
         {
+            if (_currentWorkspace?.SourceGame == null)
+            {
+                MessageBox.Show("Configured workspace must be loaded in order to run tools.", "Source SDK", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
             try
             {
-                RunProcessWithSpecialEnv($@"{_currentWorkspace.SourceGame.ContentDir}\..\bin\{tool}.exe");
+                // Run hlmv in Perforce mode if Perforce is enabled
+                if (tool == "hlmv" && _currentWorkspace.PerforceEnabled)
+                    arguments += " -p4";
+
+                RunProcessWithSpecialEnv($@"{_currentWorkspace.SourceGame.ContentDir}\..\bin\{tool}", arguments);
             }
             catch
             {
@@ -84,12 +94,13 @@ namespace SourceLauncher
             }
         }
 
-        private void RunProcessWithSpecialEnv(string fileName)
+        private void RunProcessWithSpecialEnv(string fileName, string arguments = "")
         {
             var info = new ProcessStartInfo
             {
                 FileName = fileName,
-                UseShellExecute = false
+                UseShellExecute = false,
+                Arguments = arguments,
             };
 
             info.EnvironmentVariables["VProject"] = _currentWorkspace.SourceGame.ContentDir;
@@ -113,19 +124,19 @@ namespace SourceLauncher
 
         private void LaunchSource_OnClick(object sender, RoutedEventArgs e) => RunEngine();
 
-        private void OpenHammer_OnClick(object sender, RoutedEventArgs e) => RunTool("hammer");
-        private void OpenHlmv_OnClick(object sender, RoutedEventArgs e) => RunTool("hlmv");
-        private void OpenModelBrowser_OnClick(object sender, RoutedEventArgs e) => RunTool("modelbrowser");
-        private void OpenQCEyes_OnClick(object sender, RoutedEventArgs e) => RunTool("QC_Eyes");
-        private void OpenFacePoser_OnClick(object sender, RoutedEventArgs e) => RunTool("hlfaceposer");
+        private void OpenHammer_OnClick(object sender, RoutedEventArgs e) => RunTool("hammer.exe");
+        private void OpenHlmv_OnClick(object sender, RoutedEventArgs e) => RunTool("hlmv.exe");
+        private void OpenModelBrowser_OnClick(object sender, RoutedEventArgs e) => RunTool("modelbrowser.exe");
+        private void OpenQCEyes_OnClick(object sender, RoutedEventArgs e) => RunTool("QC_Eyes.exe");
+        private void OpenFacePoser_OnClick(object sender, RoutedEventArgs e) => RunTool("hlfaceposer.exe");
         private void PublishMap_OnClick(object sender, RoutedEventArgs e) => RunPublisher();
-        private void OpenSceneManager_OnClick(object sender, RoutedEventArgs e) => RunTool("scenemanager");
-        private void OpenSceneViewer_OnClick(object sender, RoutedEventArgs e) => RunTool("sceneviewer");
-        private void OpenElementViewer_OnClick(object sender, RoutedEventArgs e) => RunTool("elementviewer");
-        private void OpenFoundry_OnClick(object sender, RoutedEventArgs e) => RunEngineTool("hammer_dll");
-        private void OpenVMTEditor_OnClick(object sender, RoutedEventArgs e) => RunEngineTool("vmt");
-        private void OpenParticleEditor_OnClick(object sender, RoutedEventArgs e) => RunEngineTool("pet");
-        private void OpenCommentaryEditor_OnClick(object sender, RoutedEventArgs e) => RunEngineTool("commedit");
+        private void OpenSceneManager_OnClick(object sender, RoutedEventArgs e) => RunTool("scenemanager.exe");
+        private void OpenSceneViewer_OnClick(object sender, RoutedEventArgs e) => RunTool("sceneviewer.exe");
+        private void OpenElementViewer_OnClick(object sender, RoutedEventArgs e) => RunTool("elementviewer.exe");
+        private void OpenFoundry_OnClick(object sender, RoutedEventArgs e) => RunEngineTool("hammer_dll.exe");
+        private void OpenVMTEditor_OnClick(object sender, RoutedEventArgs e) => RunEngineTool("vmt.exe");
+        private void OpenParticleEditor_OnClick(object sender, RoutedEventArgs e) => RunEngineTool("pet.exe");
+        private void OpenCommentaryEditor_OnClick(object sender, RoutedEventArgs e) => RunEngineTool("commedit.exe");
 
         private void OpenWorkingDir_OnClick(object sender, RoutedEventArgs e) =>
             Process.Start("explorer.exe", $"/open, {_currentWorkspace.Folder}");

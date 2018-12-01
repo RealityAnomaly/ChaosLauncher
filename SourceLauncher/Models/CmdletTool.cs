@@ -2,6 +2,7 @@
 using SourceLauncher.Controls;
 using SourceLauncher.Windows;
 using System.Management.Automation;
+using PoshCode;
 
 namespace SourceLauncher.Models
 {
@@ -17,9 +18,9 @@ namespace SourceLauncher.Models
             Metadata = meta;
         }
 
-        public static CmdletTool PickTool(ChaosShell shell)
+        public static CmdletTool PickTool(PoshConsole shellHost)
         {
-            var pickerWindow = new CmdletPickerWindow(shell);
+            var pickerWindow = new CmdletPickerWindow(shellHost);
             pickerWindow.ShowDialog();
 
             if (pickerWindow.cmdletList.SelectedItem == null)

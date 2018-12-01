@@ -1,48 +1,42 @@
 ﻿using SourceLauncher.Controls;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Management.Automation;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
+using PoshCode;
+using SourceLauncher.Utilities;
 
 namespace SourceLauncher.Windows
 {
+    /// <inheritdoc cref="Window" />
     /// <summary>
     /// Interaction logic for CmdletPicker.xaml
     /// </summary>
-    public partial class CmdletPickerWindow : Window
+    public partial class CmdletPickerWindow
     {
-        private ChaosShell shell;
-        private ObservableCollection<CommandInfo> commands = new ObservableCollection<CommandInfo>();
-        public CmdletPickerWindow(ChaosShell shell)
+        private readonly PoshConsole _shellHost;
+        private readonly ObservableCollection<CommandInfo> _commands = new ObservableCollection<CommandInfo>();
+        public CmdletPickerWindow(PoshConsole shellHost)
         {
-            this.shell = shell;
+            _shellHost = shellHost;
             InitializeComponent();
 
             setBtn.Click += delegate { Close(); };
 
             Task.Run(() =>
             {
-                IDictionary<string, CommandInfo> commandsTemp = shell.GetCommands("SourceRun");
+                var commandsTemp = _shellHost.GetCommands("SourceRun");
                 if (commandsTemp == null)
                     return;
 
                 Dispatcher.BeginInvoke(new Action(() =>
                 {
-                    foreach (KeyValuePair<string, CommandInfo> pair in commandsTemp)
-                        commands.Add(pair.Value);
+                    foreach (var pair in commandsTemp)
+                        _commands.Add(pair.Value);
 
-                    cmdletList.ItemsSource = commands;
+                    cmdletList.ItemsSource = _commands;
                 }));
             });
         }
@@ -53,13 +47,13 @@ namespace SourceLauncher.Windows
             {
                 setBtn.IsEnabled = true;
 
-                // Retrieve help for the command from ChaosShell
-                CommandInfo meta = (CommandInfo)cmdletList.SelectedItem;
+                // Retrieve help for the command from ChaosShellRaw
+                var meta = (CommandInfo)cmdletList.SelectedItem;
                 Task.Run(() =>
                 {
-                    string help = shell.GetCommandHelp(meta.Name);
+                    var help = _shellHost.GetCommandHelp(meta.Name);
 
-                    if (!(String.IsNullOrWhiteSpace(help)))
+                    if (!(string.IsNullOrWhiteSpace(help)))
                     {
                         Dispatcher.BeginInvoke(new Action(() =>
                         {
@@ -71,7 +65,7 @@ namespace SourceLauncher.Windows
             else
             {
                 setBtn.IsEnabled = false;
-                cmdletHelp.Text = String.Empty;
+                cmdletHelp.Text = string.Empty;
             }
         }
     }

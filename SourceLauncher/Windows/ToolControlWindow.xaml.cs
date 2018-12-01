@@ -7,6 +7,8 @@ using System.Management.Automation;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using PoshCode;
+using SourceLauncher.Utilities;
 using static SourceLauncher.Models.Parameter;
 
 namespace SourceLauncher.Windows
@@ -17,14 +19,14 @@ namespace SourceLauncher.Windows
     /// </summary>
     public partial class ToolControlWindow
     {
-        private readonly ChaosShell _shell;
+        private readonly PoshConsole _shellHost;
         private readonly Canvas _canvas;
         private readonly ObservableCollection<Parameter> _availableParameters = new ObservableCollection<Parameter>();
         private Parameter _selectedParam;
         public Tool Tool { get; private set; }
-        public ToolControlWindow(ChaosShell shell, Canvas canvas, Tool tool, int tabIndex = 0)
+        public ToolControlWindow(PoshConsole shellHost, Canvas canvas, Tool tool, int tabIndex = 0)
         {
-            _shell = shell;
+            _shellHost = shellHost;
             _canvas = canvas;
             Tool = tool;
             InitializeComponent();
@@ -74,7 +76,7 @@ namespace SourceLauncher.Windows
                     {
                         Dispatcher.BeginInvoke(new Action(() =>
                         {
-                            var info = _shell.GetParameters(ctool.Name);
+                            var info = _shellHost.GetParameters(ctool.Name);
                             UpdateAvailable(info);
                         }));
                     });
@@ -209,7 +211,7 @@ namespace SourceLauncher.Windows
                     {
                         lock (Tool)
                         {
-                            param.Help = _shell.GetParameterHelp(Tool.Name, param.ToString());
+                            param.Help = _shellHost.GetParameterHelp(Tool.Name, param.ToString());
 
                             Dispatcher.BeginInvoke(new Action(() =>
                             {
@@ -302,6 +304,9 @@ namespace SourceLauncher.Windows
             var connectionWindow = new ToolConnectionWindow(tools, Tool);
             connectionWindow.ShowDialog();
 
+            if (connectionWindow.Reference == null)
+                return;
+
             _selectedParam.Reference = connectionWindow.Reference;
             connectionTextBox.Text = _selectedParam.ReferenceToString();
         }
@@ -329,12 +334,12 @@ namespace SourceLauncher.Windows
 
         private void SetToolCmdlet()
         {
-            MessageBoxResult result = MessageBox.Show("Changing the cmdlet will remove all parameters and references. Are you sure you want to do this?", "Tool Configuration", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            var result = MessageBox.Show("Changing the cmdlet will remove all parameters and references. Are you sure you want to do this?", "Tool Configuration", MessageBoxButton.YesNo, MessageBoxImage.Question);
 
             if (result != MessageBoxResult.Yes)
                 return;
 
-            CmdletTool newTool = CmdletTool.PickTool(_shell);
+            var newTool = CmdletTool.PickTool(_shellHost);
             if (newTool == null)
                 return;
 

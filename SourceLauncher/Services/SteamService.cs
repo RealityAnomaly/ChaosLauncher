@@ -10,14 +10,15 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
+using SourceLauncher.Models.Steam;
 
 namespace SourceLauncher.Services
 {
     internal class SteamService : BaseService
     {
         private VProperty _configVdf;
-        private readonly IList<string> _libraryPaths = new List<string>();
-        public readonly IList<SourceGame> SourceGames = new List<SourceGame>();
+        public SteamCache Cache;
 
         public SteamService(IServiceProvider serviceProvider) : base(serviceProvider)
         {
@@ -26,14 +27,63 @@ namespace SourceLauncher.Services
 
         private void ReloadAllSteam()
         {
-            _libraryPaths.Clear();
-
+            // Load the Steam cache file
+            LoadSteamCache();
             // Retrieve Steam configuration to find Steam config files and default dir
             LoadSteamConfig();
+
+            // Rebuild the cache if out of date
+            if (Cache.UpdateRequired)
+                RebuildSteamCache();
+        }
+
+        private void LoadSteamCache()
+        {
+            try
+            {
+                Cache = JsonConvert.DeserializeObject<SteamCache>(
+                    File.ReadAllText(SteamCache.FileName));
+
+                Logger.LogInformation("Steam Cache loaded.");
+            }
+            catch (Exception e)
+            {
+                Logger.LogWarning($"Could not load the Steam Cache: {e}. Creating a new one.");
+                Cache = new SteamCache
+                {
+                    UpdateRequired = true
+                };
+            }
+        }
+
+        private void SaveSteamCache()
+        {
+            try
+            {
+                File.WriteAllText(SteamCache.FileName, JsonConvert.SerializeObject(Cache));
+            }
+            catch (Exception e)
+            {
+                Logger.LogWarning($"Could not save the Steam Cache: {e}.");
+            }
+        }
+
+        public void InvalidateSteamCache()
+        {
+            File.Delete(SteamCache.FileName);
+        }
+
+        private void RebuildSteamCache()
+        {
+            Logger.LogInformation("Rebuilding Steam cache.");
+
             // Load library paths from Steam config files
             LoadLibraryPaths();
             // Scan libraries for Source games
             LoadSourceGames();
+
+            // Save the cache.
+            SaveSteamCache();
         }
 
         private void LoadSteamConfig()
@@ -50,7 +100,7 @@ namespace SourceLauncher.Services
             var installDir = (string) steamKey.GetValue("SteamPath");
             Logger.LogInformation($"Found Steam at {installDir}");
 
-            _libraryPaths.Add(Path.Combine(installDir, @"steamapps\common"));
+            Cache.LibraryPaths.Add(Path.Combine(installDir, @"steamapps\common"));
 
             try
             {
@@ -80,13 +130,13 @@ namespace SourceLauncher.Services
                     continue;
 
                 Logger.LogInformation($"Found additional Steam library at {key.Value}");
-                _libraryPaths.Add(Path.Combine(key.Value.ToString(), @"steamapps\common"));
+                Cache.LibraryPaths.Add(Path.Combine(key.Value.ToString(), @"steamapps\common"));
             }
         }
 
         private void LoadSourceGames()
         {
-            foreach (var path in _libraryPaths)
+            foreach (var path in Cache.LibraryPaths)
             {
                 IList<string> steamApps = Directory.GetDirectories(path);
                 foreach (var steamApp in steamApps)
@@ -95,16 +145,61 @@ namespace SourceLauncher.Services
                     if (game == null) continue;
 
                     Logger.LogInformation($"Found Source game {game.ProductName} with appID {game.AppId}.");
-                    SourceGames.Add(game);
+                    Cache.SourceGames.Add(game);
                 }
             }
         }
 
-        private static SourceGame ScanSteamApp(string steamApp)
+        /// <summary>
+        /// Scans a Steam App to check if it's a Source game.
+        /// </summary>
+        private static SourceGame ScanSteamApp(string steamApp, string contentDir = null)
         {
-            IList<string> contentDirs = Directory.GetDirectories(steamApp);
-            return (from contentDir in contentDirs from contentFile in Directory.GetFiles(contentDir) where Path.GetFileName(contentFile) == ("steam.inf")
-                select new SourceGame() {ProductName = Path.GetFileName(steamApp), ContentDir = contentDir, AppId = SteamParser.ParseSteamInf(File.ReadAllLines(contentFile))["appID"]}).FirstOrDefault();
+            if (contentDir == null)
+                contentDir = steamApp;
+
+            foreach (var file in Directory.GetFiles(contentDir))
+            {
+                if (Path.GetFileName(file) != "steam.inf") continue;
+
+                // different steam.inf format for Source2
+                var appIdName = "appID";
+                var isSource2 = IsSource2(contentDir);
+                if (isSource2)
+                    appIdName = "AppID";
+
+                var game = new SourceGame
+                {
+                    ProductName = Path.GetFileName(steamApp),
+                    ContentDir = contentDir,
+                    AppId = SteamParser.ParseSteamInf(File.ReadAllLines(file))[appIdName],
+                    IsSource2 = isSource2
+                };
+
+                return game;
+            }
+
+            return Directory.GetDirectories(contentDir)
+                .Select(subFolder => ScanSteamApp(steamApp, subFolder))
+                .FirstOrDefault(app => app != null);
+        }
+
+        /// <summary>
+        /// Scans a Source content directory to see if its engine is Source 2.
+        /// </summary>
+        private static bool IsSource2(string contentDir)
+        {
+            var gameDir = Directory.GetParent(contentDir).FullName;
+            var binDir = Path.Combine(gameDir, "bin", "win64");
+
+            // no win64 folder so we're definitely not source2
+            if (!Directory.Exists(binDir))
+                return false;
+
+            // check for the presence of vconsole2.exe in the bin dir. This is a bit of a hack.
+            return Directory.GetFiles(binDir)
+                .Select(file => file.Contains("vconsole2.exe"))
+                .Any(b => b);
         }
     }
 }

@@ -23,12 +23,6 @@ namespace SourceLauncher
 
         private void OpenWorkspace(Workspace workspace)
         {
-            if (ChaosShell.IsExecuting)
-            {
-                MessageBox.Show((string)Application.Current.FindResource("chaosShellExecuting"), "ChaosShell", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
-
             if (_currentWorkspace != null && workspace.Identifier != _currentWorkspace.Identifier)
                 CloseWorkspace();
 
@@ -36,13 +30,15 @@ namespace SourceLauncher
 
             Task.Run(() =>
             {
-                ChaosShell.InvokeScript(
+                // TODO: MEGA HACK XD
+                ChaosShell.Invoke(@"Import-Module E:\SourceSDK\SourceRun\SourceRun.psd1");
+                ChaosShell.Invoke(
                     $"Set-VWorkspace -Path \"{new FileInfo(_currentWorkspace.LoadedPath).Directory?.FullName}\"");
 
                 // No longer required since we've embedded this into process start
                 /**
                 if (_currentWorkspace.SourceGame != null)
-                    ChaosShell.InvokeScript(
+                    ChaosShellRaw.InvokeScript(
                         $"Set-VProject -Path \"{_currentWorkspace.SourceGame.ContentDir}\"");*/
             });
 
@@ -56,8 +52,12 @@ namespace SourceLauncher
             if (workspace.SourceGame != null)
             {
                 EngineBranch.IsEnabled = true;
-                ToolsTab.Visibility = Visibility.Visible;
+                Source2Tab.Visibility = workspace.SourceGame.IsSource2 ? Visibility.Visible : Visibility.Hidden;
+                SourceTab.Visibility = !workspace.SourceGame.IsSource2 ? Visibility.Visible : Visibility.Hidden;
             }
+
+            // Build the workspace file tree
+            FileSelector.BuildTree(_currentWorkspace.Folder);
 
             // Show Perforce version control if P4 is enabled on the workspace.
             P4Group.Visibility = workspace.PerforceEnabled ? Visibility.Visible : Visibility.Hidden;
@@ -65,12 +65,6 @@ namespace SourceLauncher
 
         private bool CloseWorkspace()
         {
-            if (ChaosShell.IsExecuting)
-            {
-                MessageBox.Show((string)Application.Current.FindResource("chaosShellExecuting"), "ChaosShell", MessageBoxButton.OK, MessageBoxImage.Error);
-                return false;
-            }
-
             if (_currentWorkspace.UnsavedChanges)
             {
                 var result = MessageBox.Show("Save changes to the workspace?", "Workspace", MessageBoxButton.YesNoCancel, MessageBoxImage.Question, MessageBoxResult.Yes);
@@ -89,19 +83,23 @@ namespace SourceLauncher
 
             Task.Run(() =>
             {
-                ChaosShell.InvokeScript("Set-VWorkspace -Clear");
+                ChaosShell.Invoke("Set-VWorkspace -Clear");
 
                 // No longer required since we've embedded this into process start
-                //ChaosShell.InvokeScript("Set-VProject -Clear");
+                //ChaosShellRaw.InvokeScript("Set-VProject -Clear");
             });
             
             WorkspaceTab.Visibility = Visibility.Hidden;
-            ToolsTab.Visibility = Visibility.Hidden;
+            SourceTab.Visibility = Visibility.Hidden;
+            Source2Tab.Visibility = Visibility.Hidden;
             SaveWorkspaceBtn.IsEnabled = false;
             CloseWorkspaceBtn.IsEnabled = false;
             EngineBranch.IsEnabled = false;
 
             Title = "Chaos Launcher";
+
+            // Clear the file tree
+            FileSelector.Items.Clear();
 
             return true;
         }

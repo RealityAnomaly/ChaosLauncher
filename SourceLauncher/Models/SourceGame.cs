@@ -14,6 +14,7 @@ namespace SourceLauncher.Models
         public string AppExecutable;
         public string ProductName;
         public string ContentDir;
+        public bool IsSource2;
 
         public bool Equals(SourceGame other)
         {

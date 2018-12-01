@@ -4,21 +4,23 @@ using SourceLauncher.Services;
 using System;
 using System.Windows;
 using Microsoft.Extensions.DependencyInjection;
+using PoshCode;
 
 namespace SourceLauncher.Windows
 {
+    /// <inheritdoc cref="Window" />
     /// <summary>
     /// Interaction logic for WorkspaceSettingsWindow.xaml
     /// </summary>
     public partial class WorkspaceSettingsWindow
     {
-        private ChaosShell _chaosShell;
+        private PoshConsole _shellHost;
         private readonly Workspace _workspace;
         private readonly PerforceService _perforce;
         private readonly SteamService _steam;
-        public WorkspaceSettingsWindow(IServiceProvider serviceProvider, ChaosShell chaosShell, Workspace workspace)
+        public WorkspaceSettingsWindow(IServiceProvider serviceProvider, PoshConsole shellHost, Workspace workspace)
         {
-            _chaosShell = chaosShell;
+            _shellHost = shellHost;
             _workspace = workspace;
             workspace.UnappliedChanges = false;
 
@@ -27,7 +29,7 @@ namespace SourceLauncher.Windows
 
             InitializeComponent();
             MainGrid.DataContext = workspace;
-            BranchSelector.ItemsSource = _steam.SourceGames;
+            BranchSelector.ItemsSource = _steam.Cache.SourceGames;
         }
 
         private void SaveBtn_Click(object sender, RoutedEventArgs e)

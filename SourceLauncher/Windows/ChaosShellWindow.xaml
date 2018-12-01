@@ -7,7 +7,5 @@
         xmlns:controls="clr-namespace:SourceLauncher.Controls"
         mc:Ignorable="d"
         Title="ChaosShell" Height="450" Width="800" Icon="/Images/cs_icon.png">
-    <Grid>
-        <controls:ChaosShell x:Name="chaosShell" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
-    </Grid>
+    <pc:PoshConsole xmlns:pc="http://schemas.poshcode.org/wpf/poshcode" x:Name="ChaosShell" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" BackgroundColor="DarkRed" ForegroundColor="White" />
 </Window>

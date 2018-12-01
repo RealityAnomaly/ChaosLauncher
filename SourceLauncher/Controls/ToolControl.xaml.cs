@@ -3,40 +3,30 @@ using SourceLauncher.Windows;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Shapes;
+using PoshCode;
 
 namespace SourceLauncher.Controls
 {
+    /// <inheritdoc cref="UserControl" />
     /// <summary>
     /// Interaction logic for ToolControl.xaml
     /// </summary>
-    public partial class ToolControl : UserControl
+    public partial class ToolControl
     {
-        private IList<OutputReference> Outputs = new List<OutputReference>();
-        private IList<Line> ConnectionLines = new List<Line>();
+        private readonly IList<OutputReference> _outputs = new List<OutputReference>();
+        private readonly IList<Line> _connectionLines = new List<Line>();
         public Tool Tool { get; private set; }
 
-        private ChaosShell chaosShell;
+        private readonly PoshConsole _shellHost;
 
-        private enum ConnectionType
+        public ToolControl(PoshConsole shellHost, Tool tool)
         {
-            Input,
-            Output
-        }
-
-        public ToolControl(ChaosShell chaosShell, Tool tool)
-        {
-            this.chaosShell = chaosShell;
+            _shellHost = shellHost;
             Tool = tool;
 
             InitializeComponent();
@@ -65,7 +55,7 @@ namespace SourceLauncher.Controls
                 gradientCol1.Color = Color.FromRgb(60, 119, 224);
                 gradientCol2.Color = Color.FromRgb(1, 36, 86);
             }
-            else if (Tool.GetType() == typeof(ExternalTool))
+            else if (Tool is ExternalTool)
             {
                 typeImage.Visibility = Visibility.Hidden;
 
@@ -89,7 +79,7 @@ namespace SourceLauncher.Controls
 
         private void SetImage(string source)
         {
-            BitmapImage img = new BitmapImage();
+            var img = new BitmapImage();
             img.BeginInit();
             img.UriSource = new Uri("pack://application:,,,/SourceLauncher;component/Images/" + source);
             img.EndInit();
@@ -102,25 +92,25 @@ namespace SourceLauncher.Controls
             if (connection.SourceToolId == Tool.Identifier)
                 throw new Exception("Tool cannot be referenced by itself.");
 
-            Outputs.Add(connection);
+            _outputs.Add(connection);
         }
 
         private void Delete_Click(object sender, RoutedEventArgs e)
         {
-            MessageBoxResult result = MessageBox.Show("Are you sure you want to delete this action widget?\nDeleting this widget will remove all its connections and parameters.", "Workspace", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            var result = MessageBox.Show(@"Are you sure you want to delete this action widget? Deleting this widget will remove all its connections and parameters.", "Workspace", MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (result == MessageBoxResult.Yes)
                 Delete();
         }
 
         private void Delete()
         {
-            Canvas canvas = Parent as Canvas;
-            canvas.Children.Remove(this);
+            var canvas = Parent as Canvas;
+            canvas?.Children.Remove(this);
         }
 
         private void SetParametersBtn_Click(object sender, RoutedEventArgs e)
         {
-            OpenSettings(0);
+            OpenSettings();
         }
 
         private void SetInputsBtn_Click(object sender, RoutedEventArgs e)
@@ -135,9 +125,9 @@ namespace SourceLauncher.Controls
 
         private void OpenSettings(int tabIndex = 0)
         {
-            Canvas canvas = Parent as Canvas;
+            var canvas = Parent as Canvas;
 
-            ToolControlWindow toolControlWindow = new ToolControlWindow(chaosShell, canvas, Tool, tabIndex);
+            var toolControlWindow = new ToolControlWindow(_shellHost, canvas, Tool, tabIndex);
             toolControlWindow.ShowDialog();
 
             Tool = toolControlWindow.Tool;
@@ -147,17 +137,17 @@ namespace SourceLauncher.Controls
 
         public void UpdateConnections()
         {
-            Canvas canvas = Parent as Canvas;
+            if (!(Parent is Canvas canvas)) throw new InvalidOperationException();
 
-            foreach (Line line in ConnectionLines)
+            foreach (var line in _connectionLines)
             {
                 canvas.Children.Remove(line);
             }
-
-            ConnectionLines.Clear();
+            
+            _connectionLines.Clear();
 
             IList<ToolControl> linkedControls = new List<ToolControl>();
-            foreach(Parameter param in Tool.Parameters.Where(p => p.Reference != null))
+            foreach(var param in Tool.Parameters.Where(p => p.Reference != null))
             {
                 foreach(UIElement obj in canvas.Children)
                 {
@@ -173,13 +163,13 @@ namespace SourceLauncher.Controls
             if (linkedControls.Count <= 0)
                 return;
 
-            Point localPoint = TransformToAncestor(canvas).Transform(new Point(0, 0));
+            var localPoint = TransformToAncestor(canvas).Transform(new Point(0, 0));
 
-            foreach (ToolControl control in linkedControls)
+            foreach (var control in linkedControls)
             {
-                Point remotePoint = control.TransformToAncestor(canvas).Transform(new Point(0, 0));
+                var remotePoint = control.TransformToAncestor(canvas).Transform(new Point(0, 0));
 
-                Line line = new Line
+                var line = new Line
                 {
                     Stroke = Brushes.Black,
                     X1 = localPoint.X ,
@@ -193,7 +183,7 @@ namespace SourceLauncher.Controls
                     StrokeThickness = 2
                 };
 
-                ConnectionLines.Add(line);
+                _connectionLines.Add(line);
                 canvas.Children.Add(line);
             }
         }

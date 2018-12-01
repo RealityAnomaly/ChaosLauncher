@@ -1,50 +1,37 @@
-﻿using SourceLauncher.Controls;
-using SourceLauncher.Models;
+﻿using SourceLauncher.Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace SourceLauncher.Windows
 {
+    /// <inheritdoc cref="Window" />
     /// <summary>
     /// Interaction logic for ToolConnectionWindow.xaml
     /// </summary>
-    public partial class ToolConnectionWindow : Window
+    public partial class ToolConnectionWindow
     {
-        private IEnumerable<Tool> tools;
-        private Tool currentTool;
+        private Tool _currentTool;
 
-        private ObservableCollection<Output> outputList = new ObservableCollection<Output>();
+        private readonly ObservableCollection<Output> _outputList = new ObservableCollection<Output>();
 
         public OutputReference Reference { get; private set; }
         public ToolConnectionWindow(IEnumerable<Tool> toolControls, Tool currentTool, OutputReference reference = null)
         {
             InitializeComponent();
-            this.tools = toolControls;
-            this.currentTool = currentTool;
+            _currentTool = currentTool;
 
             Reference = reference;
-
             entityList.ItemsSource = toolControls;
-
-            outputList.Add(new Output(null));
-            entityOutputs.ItemsSource = outputList;
+            _outputList.Add(new Output());
+            entityOutputs.ItemsSource = _outputList;
         }
 
         private void EntityList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            outputList.Clear();
+            _outputList.Clear();
 
             if (entityList.SelectedItem == null)
             {
@@ -57,14 +44,14 @@ namespace SourceLauncher.Windows
             linkButton.IsEnabled = true;
             entityOutputs.IsEnabled = true;
 
-            Output ou = new Output(null);
-            outputList.Add(ou);
+            var ou = new Output();
+            _outputList.Add(ou);
             entityOutputs.SelectedItem = ou;
         }
 
         private void LinkButton_Click(object sender, RoutedEventArgs e)
         {
-            Tool srcTool = entityList.SelectedItem as Tool;
+            if (!(entityList.SelectedItem is Tool srcTool)) throw new ArgumentNullException(nameof(srcTool));
             Reference = new OutputReference(srcTool.Identifier, entityOutputs.SelectedItem as Output);
 
             Close();

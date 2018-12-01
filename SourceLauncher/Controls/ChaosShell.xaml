@@ -5,14 +5,8 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:SourceLauncher.Controls"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800" FocusVisualStyle="{x:Null}">
+             d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="10" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
-        <ProgressBar x:Name="progressBar" Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
-        <RichTextBox x:Name="internalShell" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" FontFamily="Consolas" Background="#FF610F0F" Foreground="#FFEEEDF0"
-                         IsReadOnly="True" PreviewKeyDown="InternalShell_KeyDown" />
+            
     </Grid>
 </UserControl>

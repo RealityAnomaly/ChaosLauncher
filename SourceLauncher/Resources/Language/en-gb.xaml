@@ -1,5 +1,5 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:system="clr-namespace:System;assembly=mscorlib">
-    <system:String x:Key="chaosShellExecuting">ChaosShell is currently executing a blocking command. No commands can be executed until it is completed.</system:String>
+    <system:String x:Key="chaosShellExecuting">ChaosShellRaw is currently executing a blocking command. No commands can be executed until it is completed.</system:String>
 </ResourceDictionary>
